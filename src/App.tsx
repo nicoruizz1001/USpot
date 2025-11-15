@@ -11,7 +11,11 @@ import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import LockIn from "./pages/LockIn";
+import LockInMap from "./pages/LockInMap";
+import LockInList from "./pages/LockInList";
 import Events from "./pages/Events";
+import EventsMap from "./pages/EventsMap";
+import EventsList from "./pages/EventsList";
 import CreateEvent from "./pages/CreateEvent";
 
 const queryClient = new QueryClient();
@@ -43,10 +47,42 @@ const App = () => (
               }
             />
             <Route
+              path="/lock-in/map"
+              element={
+                <ProtectedRoute>
+                  <LockInMap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lock-in/list"
+              element={
+                <ProtectedRoute>
+                  <LockInList />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/events"
               element={
                 <ProtectedRoute>
                   <Events />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events/map"
+              element={
+                <ProtectedRoute>
+                  <EventsMap />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events/list"
+              element={
+                <ProtectedRoute>
+                  <EventsList />
                 </ProtectedRoute>
               }
             />

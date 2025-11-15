@@ -118,7 +118,7 @@ const CreateEvent = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <AppHeader />
+      <AppHeader showNavTabs />
 
       <div className="flex-1 overflow-auto pb-28 md:pb-0">
         <div className="container max-w-2xl mx-auto px-6 py-6">

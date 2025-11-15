@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,15 +10,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MapPin, User, LogOut } from 'lucide-react';
+import { MapPin, User, LogOut, Calendar, Plus } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AppHeaderProps {
   hideActions?: boolean;
+  showNavTabs?: boolean;
 }
 
-export const AppHeader = ({ hideActions = false }: AppHeaderProps) => {
+export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeaderProps) => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     await signOut();
@@ -34,21 +37,65 @@ export const AppHeader = ({ hideActions = false }: AppHeaderProps) => {
       .slice(0, 2);
   };
 
+  const isLockInActive = location.pathname.startsWith('/lock-in');
+  const isEventsActive = location.pathname.startsWith('/events');
+  const isCreateActive = location.pathname === '/create';
+
   return (
     <header className="w-full bg-background border-b border-border">
       <div className="container mx-auto flex h-20 items-center justify-between px-6">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-        >
-          <div className="bg-blue-600 text-white rounded-2xl p-3 shadow-md">
-            <MapPin className="w-7 h-7" />
-          </div>
-          <div className="flex flex-col items-start">
-            <span className="text-2xl font-bold text-foreground">Uspot</span>
-            <span className="text-sm text-muted-foreground">Campus Navigation</span>
-          </div>
-        </button>
+        <div className="flex items-center gap-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
+            <div className="bg-blue-600 text-white rounded-2xl p-3 shadow-md">
+              <MapPin className="w-7 h-7" />
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-2xl font-bold text-foreground">Uspot</span>
+              <span className="text-sm text-muted-foreground">Campus Navigation</span>
+            </div>
+          </button>
+
+          {showNavTabs && (
+            <nav className="hidden md:flex items-center gap-2">
+              <Button
+                variant={isLockInActive ? 'default' : 'ghost'}
+                onClick={() => navigate('/lock-in')}
+                className={cn(
+                  'px-6',
+                  isLockInActive && 'bg-blue-600 hover:bg-blue-700'
+                )}
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Lock-in
+              </Button>
+              <Button
+                variant={isCreateActive ? 'default' : 'ghost'}
+                onClick={() => navigate('/create')}
+                className={cn(
+                  'px-6',
+                  isCreateActive && 'bg-blue-600 hover:bg-blue-700'
+                )}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create
+              </Button>
+              <Button
+                variant={isEventsActive ? 'default' : 'ghost'}
+                onClick={() => navigate('/events')}
+                className={cn(
+                  'px-6',
+                  isEventsActive && 'bg-blue-600 hover:bg-blue-700'
+                )}
+              >
+                <Calendar className="w-4 h-4 mr-2" />
+                Events
+              </Button>
+            </nav>
+          )}
+        </div>
 
         {!hideActions && (
           <div className="flex items-center gap-4">
