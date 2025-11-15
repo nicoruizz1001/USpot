@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation, Menu } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation } from '@/contexts/LocationContext';
@@ -296,73 +297,99 @@ const Events = () => {
       <AppHeader showNavTabs />
 
       <div className="flex-1 flex overflow-hidden pb-16 md:pb-0">
-        <div className="hidden md:flex w-96 border-r border-border bg-background flex-col">
-          <FilterSection />
+        <ResizablePanelGroup direction="horizontal" className="hidden md:flex">
+          <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
+            <div className="flex flex-col h-full border-r border-border bg-background">
+              <FilterSection />
 
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-3">
-              {filteredEvents.map((event) => (
-                <Card
-                  key={event.id}
-                  className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden ${
-                    selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
-                  }`}
-                  onClick={() => {
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-3">
+                  {filteredEvents.map((event) => (
+                    <Card
+                      key={event.id}
+                      className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden ${
+                        selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
+                      }`}
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      <div className="space-y-2 w-full min-w-0">
+                        <div className="flex items-start justify-between gap-2 w-full">
+                          <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
+                            {event.title}
+                          </h3>
+                          <Badge className={`${getCategoryColor(event.category)} text-xs shrink-0 whitespace-nowrap`}>
+                            {event.category}
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-1 text-sm text-muted-foreground w-full">
+                          <div className="flex items-center gap-2 w-full min-w-0">
+                            <Calendar className="w-4 h-4 shrink-0" />
+                            <span className="truncate flex-1">{new Date(event.date).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center gap-2 w-full min-w-0">
+                            <Clock className="w-4 h-4 shrink-0" />
+                            <span className="truncate flex-1">{event.time}</span>
+                          </div>
+                          <div className="flex items-center gap-2 w-full min-w-0">
+                            <MapPin className="w-4 h-4 shrink-0" />
+                            <span className="truncate flex-1">
+                              {event.building} {event.room && `- ${event.room}`}
+                            </span>
+                          </div>
+                          {isLocationEnabled && event.distance !== undefined && (
+                            <div className="flex items-center gap-2">
+                              <DistanceBadge distance={event.distance} />
+                            </div>
+                          )}
+                        </div>
+
+                        {event.organization.name && (
+                          <div className="pt-2 border-t border-border w-full min-w-0">
+                            <p className="text-xs text-muted-foreground truncate">
+                              by {event.organization.name}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  ))}
+
+                  {filteredEvents.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No events found matching your filters
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle className="hover:bg-blue-200 transition-colors" />
+
+          <ResizablePanel defaultSize={70} minSize={50}>
+            <div className="h-full relative">
+              <MapView
+                mode="events"
+                buildings={[]}
+                events={filteredEvents}
+                onBuildingClick={() => {}}
+                onEventClick={(event) => {
+                  if (!navigationDestination) {
                     setSelectedEvent(event);
                     setIsModalOpen(true);
-                  }}
-                >
-                  <div className="space-y-2 w-full min-w-0">
-                    <div className="flex items-start justify-between gap-2 w-full">
-                      <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
-                        {event.title}
-                      </h3>
-                      <Badge className={`${getCategoryColor(event.category)} text-xs shrink-0 whitespace-nowrap`}>
-                        {event.category}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-1 text-sm text-muted-foreground w-full">
-                      <div className="flex items-center gap-2 w-full min-w-0">
-                        <Calendar className="w-4 h-4 shrink-0" />
-                        <span className="truncate flex-1">{new Date(event.date).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-2 w-full min-w-0">
-                        <Clock className="w-4 h-4 shrink-0" />
-                        <span className="truncate flex-1">{event.time}</span>
-                      </div>
-                      <div className="flex items-center gap-2 w-full min-w-0">
-                        <MapPin className="w-4 h-4 shrink-0" />
-                        <span className="truncate flex-1">
-                          {event.building} {event.room && `- ${event.room}`}
-                        </span>
-                      </div>
-                      {isLocationEnabled && event.distance !== undefined && (
-                        <div className="flex items-center gap-2">
-                          <DistanceBadge distance={event.distance} />
-                        </div>
-                      )}
-                    </div>
-
-                    {event.organization.name && (
-                      <div className="pt-2 border-t border-border w-full min-w-0">
-                        <p className="text-xs text-muted-foreground truncate">
-                          by {event.organization.name}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              ))}
-
-              {filteredEvents.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No events found matching your filters
-                </div>
-              )}
+                  }
+                }}
+                userLocation={userLocation}
+                navigationDestination={navigationDestination}
+                onExitNavigation={() => setNavigationDestination(null)}
+              />
             </div>
-          </ScrollArea>
-        </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
 
         <div className="md:hidden flex-1 flex flex-col">
           <div className="border-b border-border bg-background">
@@ -502,23 +529,6 @@ const Events = () => {
           )}
         </div>
 
-        <div className="hidden md:block flex-1 relative">
-          <MapView
-            mode="events"
-            buildings={[]}
-            events={filteredEvents}
-            onBuildingClick={() => {}}
-            onEventClick={(event) => {
-              if (!navigationDestination) {
-                setSelectedEvent(event);
-                setIsModalOpen(true);
-              }
-            }}
-            userLocation={userLocation}
-            navigationDestination={navigationDestination}
-            onExitNavigation={() => setNavigationDestination(null)}
-          />
-        </div>
       </div>
 
       <EventDetailModal
