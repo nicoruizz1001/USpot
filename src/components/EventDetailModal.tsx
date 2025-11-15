@@ -17,6 +17,8 @@ interface EventDetailModalProps {
 export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDetailModalProps) => {
   const isMobile = useIsMobile();
 
+  console.log('EventDetailModal render:', { event: event?.title, isOpen, isMobile });
+
   if (!event) return null;
 
   const handleNavigate = () => {
@@ -180,24 +182,24 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <Sheet open={isOpen} onOpenChange={onClose}>
-        <SheetContent
-          side="bottom"
-          className="h-[90vh] rounded-t-2xl p-6"
-        >
-          {content}
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-6">
-        {content}
-      </DialogContent>
-    </Dialog>
+    <>
+      {isMobile ? (
+        <Sheet open={isOpen} onOpenChange={onClose}>
+          <SheetContent
+            side="bottom"
+            className="h-[90vh] rounded-t-2xl p-6 z-[100]"
+          >
+            {content}
+          </SheetContent>
+        </Sheet>
+      ) : (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col p-6 z-[100]">
+            {content}
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 };
