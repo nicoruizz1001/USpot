@@ -69,15 +69,13 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
       <div className="container mx-auto h-20 px-6 flex items-center">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          className="flex items-center hover:opacity-80 transition-opacity"
         >
-          <div className="bg-blue-600 text-white rounded-2xl p-3 shadow-md">
-            <MapPin className="w-7 h-7" />
-          </div>
-          <div className="flex flex-col items-start">
-            <span className="text-2xl font-bold text-foreground">Uspot</span>
-            <span className="text-sm text-muted-foreground">Campus Navigation</span>
-          </div>
+          <img
+            src="/image.png"
+            alt="uSpot"
+            className="h-12 w-auto object-contain"
+          />
         </button>
 
         {showNavTabs && (
