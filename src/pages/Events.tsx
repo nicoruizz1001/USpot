@@ -17,7 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
-import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation } from 'lucide-react';
+import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation, Menu } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation } from '@/contexts/LocationContext';
 import { calculateDistance, sortByDistance, filterByDistance } from '@/utils/distance';
@@ -37,6 +37,7 @@ const Events = () => {
     coordinates: [number, number];
     name: string;
   } | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const { userLocation, isLocationEnabled, enableLocation } = useLocation();
   const navigate = useNavigate();
 
@@ -360,7 +361,34 @@ const Events = () => {
         </div>
 
         <div className="md:hidden flex-1 flex flex-col">
-          <FilterSection />
+          <div className="border-b border-border bg-background">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="w-full py-3 flex items-center justify-between px-4 hover:bg-accent"
+            >
+              <div className="flex items-center gap-2">
+                <Menu className="w-5 h-5" />
+                <span className="font-medium">
+                  {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+                </span>
+              </div>
+              {(categoryFilters.length > 0 || showDistanceFilter) && (
+                <Badge variant="secondary" className="ml-2">
+                  {categoryFilters.length + (showDistanceFilter ? 1 : 0)}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <FilterSection />
+          </div>
 
           <div className="flex border-b border-border bg-background">
             <button
