@@ -304,7 +304,7 @@ const Events = () => {
               {filteredEvents.map((event) => (
                 <Card
                   key={event.id}
-                  className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+                  className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden ${
                     selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
                   }`}
                   onClick={() => {
@@ -312,9 +312,9 @@ const Events = () => {
                     setIsModalOpen(true);
                   }}
                 >
-                  <div className="space-y-2 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 break-words">
+                  <div className="space-y-2 w-full min-w-0">
+                    <div className="flex items-start justify-between gap-2 w-full">
+                      <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
                         {event.title}
                       </h3>
                       <Badge className={`${getCategoryColor(event.category)} text-xs shrink-0 whitespace-nowrap`}>
@@ -322,18 +322,18 @@ const Events = () => {
                       </Badge>
                     </div>
 
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2 min-w-0">
+                    <div className="space-y-1 text-sm text-muted-foreground w-full">
+                      <div className="flex items-center gap-2 w-full min-w-0">
                         <Calendar className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{new Date(event.date).toLocaleDateString()}</span>
+                        <span className="truncate flex-1">{new Date(event.date).toLocaleDateString()}</span>
                       </div>
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-2 w-full min-w-0">
                         <Clock className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{event.time}</span>
+                        <span className="truncate flex-1">{event.time}</span>
                       </div>
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-2 w-full min-w-0">
                         <MapPin className="w-4 h-4 shrink-0" />
-                        <span className="truncate">
+                        <span className="truncate flex-1">
                           {event.building} {event.room && `- ${event.room}`}
                         </span>
                       </div>
@@ -345,7 +345,7 @@ const Events = () => {
                     </div>
 
                     {event.organization.name && (
-                      <div className="pt-2 border-t border-border min-w-0">
+                      <div className="pt-2 border-t border-border w-full min-w-0">
                         <p className="text-xs text-muted-foreground truncate">
                           by {event.organization.name}
                         </p>
@@ -423,7 +423,7 @@ const Events = () => {
                 {filteredEvents.map((event) => (
                   <Card
                     key={event.id}
-                    className={`p-4 cursor-pointer transition-all hover:shadow-md ${
+                    className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden ${
                       selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
                     }`}
                     onClick={() => {
@@ -431,9 +431,9 @@ const Events = () => {
                     setIsModalOpen(true);
                   }}
                   >
-                    <div className="space-y-2 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 break-words">
+                    <div className="space-y-2 w-full min-w-0">
+                      <div className="flex items-start justify-between gap-2 w-full">
+                        <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
                           {event.title}
                         </h3>
                         <Badge className={`${getCategoryColor(event.category)} text-xs shrink-0 whitespace-nowrap`}>
@@ -441,18 +441,18 @@ const Events = () => {
                         </Badge>
                       </div>
 
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2 min-w-0">
+                      <div className="space-y-1 text-sm text-muted-foreground w-full">
+                        <div className="flex items-center gap-2 w-full min-w-0">
                           <Calendar className="w-4 h-4 shrink-0" />
-                          <span className="truncate">{new Date(event.date).toLocaleDateString()}</span>
+                          <span className="truncate flex-1">{new Date(event.date).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 w-full min-w-0">
                           <Clock className="w-4 h-4 shrink-0" />
-                          <span className="truncate">{event.time}</span>
+                          <span className="truncate flex-1">{event.time}</span>
                         </div>
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-2 w-full min-w-0">
                           <MapPin className="w-4 h-4 shrink-0" />
-                          <span className="truncate">
+                          <span className="truncate flex-1">
                             {event.building} {event.room && `- ${event.room}`}
                           </span>
                         </div>
@@ -464,7 +464,7 @@ const Events = () => {
                       </div>
 
                       {event.organization.name && (
-                        <div className="pt-2 border-t border-border min-w-0">
+                        <div className="pt-2 border-t border-border w-full min-w-0">
                           <p className="text-xs text-muted-foreground truncate">
                             by {event.organization.name}
                           </p>

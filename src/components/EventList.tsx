@@ -22,7 +22,7 @@ export const EventList = ({ events, onEventClick }: EventListProps) => {
         <Card
           key={event.id}
           onClick={() => onEventClick(event)}
-          className={`p-6 cursor-pointer hover:shadow-lg transition-shadow border-l-4 ${
+          className={`p-6 cursor-pointer hover:shadow-lg transition-shadow border-l-4 overflow-hidden ${
             borderColors[index % borderColors.length]
           } bg-white`}
         >
