@@ -18,3 +18,26 @@ export type Profile = {
   created_at: string;
   updated_at: string;
 };
+
+export type Building = {
+  id: string;
+  name: string;
+  category: string;
+  sub_area: string;
+  latitude: number;
+  longitude: number;
+  hours: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Room = {
+  id: string;
+  building_id: string;
+  room_name: string;
+  capacity: number;
+  floor: string;
+  available: boolean;
+  created_at: string;
+  updated_at: string;
+};

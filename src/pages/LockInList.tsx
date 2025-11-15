@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building } from '@/types';
-import { mockBuildings } from '@/data/mockData';
+import { fetchBuildings } from '@/services/buildingsService';
 import { BuildingPanel } from '@/components/BuildingPanel';
 import { BuildingList } from '@/components/BuildingList';
 import { AppHeader } from '@/components/AppHeader';
@@ -10,7 +10,20 @@ import { useNavigate } from 'react-router-dom';
 
 const LockInList = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    loadBuildings();
+  }, []);
+
+  const loadBuildings = async () => {
+    setLoading(true);
+    const data = await fetchBuildings();
+    setBuildings(data);
+    setLoading(false);
+  };
 
   const handleViewChange = (view: 'map' | 'list') => {
     if (view === 'map') {
@@ -28,7 +41,13 @@ const LockInList = () => {
             <h2 className="text-2xl font-bold text-foreground">Available Rooms</h2>
           </div>
 
-          <BuildingList buildings={mockBuildings} onBuildingClick={setSelectedBuilding} />
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Loading buildings...
+            </div>
+          ) : (
+            <BuildingList buildings={buildings} onBuildingClick={setSelectedBuilding} />
+          )}
         </div>
 
         {selectedBuilding && (

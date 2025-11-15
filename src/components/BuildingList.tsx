@@ -1,37 +1,58 @@
 import { Building } from '@/types';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface BuildingListProps {
   buildings: Building[];
   onBuildingClick: (building: Building) => void;
 }
 
-const borderColors = [
-  'border-l-yellow-500',
-  'border-l-green-500',
-  'border-l-red-500',
-  'border-l-green-500',
-  'border-l-red-500',
-  'border-l-blue-500',
-];
+const getCategoryColor = (category?: string) => {
+  switch (category) {
+    case 'Library':
+      return 'border-l-blue-500';
+    case 'Academic':
+      return 'border-l-green-500';
+    case 'Student Life':
+      return 'border-l-yellow-500';
+    case 'Recreation':
+      return 'border-l-red-500';
+    default:
+      return 'border-l-gray-500';
+  }
+};
 
 export const BuildingList = ({ buildings, onBuildingClick }: BuildingListProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {buildings.map((building, index) => (
+      {buildings.map((building) => (
         <Card
           key={building.id}
           onClick={() => onBuildingClick(building)}
           className={`p-6 cursor-pointer hover:shadow-lg transition-shadow border-l-4 ${
-            borderColors[index % borderColors.length]
+            getCategoryColor(building.category)
           } bg-white`}
         >
-          <h3 className="text-xl font-bold text-foreground mb-3">{building.name}</h3>
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="text-xl font-bold text-foreground">{building.name}</h3>
+            {building.category && (
+              <Badge variant="secondary" className="text-xs">
+                {building.category}
+              </Badge>
+            )}
+          </div>
+          {building.subArea && (
+            <p className="text-sm text-muted-foreground mb-3">{building.subArea}</p>
+          )}
           <div className="space-y-1">
-            <p className="text-base text-muted-foreground">{building.totalRooms} rooms total</p>
-            <p className="text-base text-muted-foreground font-medium">
-              {building.availableRooms} available now
+            <p className="text-base text-muted-foreground">
+              {building.totalRooms > 0 ? `${building.totalRooms} rooms total` : 'No rooms listed'}
             </p>
+            {building.totalRooms > 0 && (
+              <p className="text-base text-muted-foreground font-medium">
+                {building.availableRooms} available now
+              </p>
+            )}
             <p className="text-sm text-muted-foreground mt-3">Hours: {building.hours}</p>
           </div>
         </Card>

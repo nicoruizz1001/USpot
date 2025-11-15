@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building } from '@/types';
-import { mockBuildings } from '@/data/mockData';
+import { fetchBuildings } from '@/services/buildingsService';
 import { MapView } from '@/components/MapView';
 import { BuildingPanel } from '@/components/BuildingPanel';
 import { AppHeader } from '@/components/AppHeader';
@@ -17,34 +17,46 @@ import { Search, MapPin, Users, ChevronDown, X } from 'lucide-react';
 const LockIn = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [locationFilters, setLocationFilters] = useState<string[]>([]);
-  const [buildingTypeFilters, setBuildingTypeFilters] = useState<string[]>([]);
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
+  const [subAreaFilters, setSubAreaFilters] = useState<string[]>([]);
   const [activeView, setActiveView] = useState<'map' | 'list'>('list');
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredBuildings = mockBuildings.filter((building) => {
+  useEffect(() => {
+    loadBuildings();
+  }, []);
+
+  const loadBuildings = async () => {
+    setLoading(true);
+    const data = await fetchBuildings();
+    setBuildings(data);
+    setLoading(false);
+  };
+
+  const uniqueSubAreas = Array.from(new Set(buildings.map(b => b.subArea).filter(Boolean)));
+  const uniqueCategories = Array.from(new Set(buildings.map(b => b.category).filter(Boolean)));
+
+  const filteredBuildings = buildings.filter((building) => {
     const matchesSearch = building.name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesLocation = locationFilters.length === 0 ||
-      locationFilters.some(filter => building.name.toLowerCase().includes(filter.toLowerCase()));
+    const matchesSubArea = subAreaFilters.length === 0 ||
+      subAreaFilters.some(filter => building.subArea === filter);
 
-    const matchesType = buildingTypeFilters.length === 0 ||
-      buildingTypeFilters.some(filter => {
-        if (filter === 'library') return building.name.toLowerCase().includes('library');
-        if (filter === 'academic') return !building.name.toLowerCase().includes('library');
-        return false;
-      });
+    const matchesCategory = categoryFilters.length === 0 ||
+      categoryFilters.some(filter => building.category === filter);
 
-    return matchesSearch && matchesLocation && matchesType;
+    return matchesSearch && matchesSubArea && matchesCategory;
   });
 
-  const toggleLocationFilter = (value: string) => {
-    setLocationFilters(prev =>
+  const toggleSubAreaFilter = (value: string) => {
+    setSubAreaFilters(prev =>
       prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
     );
   };
 
-  const toggleBuildingTypeFilter = (value: string) => {
-    setBuildingTypeFilters(prev =>
+  const toggleCategoryFilter = (value: string) => {
+    setCategoryFilters(prev =>
       prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
     );
   };
@@ -66,31 +78,33 @@ const LockIn = () => {
           <PopoverTrigger asChild>
             <Button variant="outline" className="flex-1 justify-between">
               <span className="truncate">
-                {locationFilters.length === 0
-                  ? 'Location'
-                  : `${locationFilters.length} selected`}
+                {subAreaFilters.length === 0
+                  ? 'Area'
+                  : `${subAreaFilters.length} selected`}
               </span>
               <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56 p-3" align="start">
+          <PopoverContent className="w-64 p-3" align="start">
             <div className="space-y-3">
-              <div className="font-medium text-sm">Location</div>
-              {['north', 'central', 'south'].map((location) => (
-                <div key={location} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`location-${location}-filter`}
-                    checked={locationFilters.includes(location)}
-                    onCheckedChange={() => toggleLocationFilter(location)}
-                  />
-                  <label
-                    htmlFor={`location-${location}-filter`}
-                    className="text-sm cursor-pointer capitalize"
-                  >
-                    {location} Campus
-                  </label>
-                </div>
-              ))}
+              <div className="font-medium text-sm">Sub-Area</div>
+              <ScrollArea className="h-48">
+                {uniqueSubAreas.map((subArea) => (
+                  <div key={subArea} className="flex items-center space-x-2 mb-2">
+                    <Checkbox
+                      id={`subarea-${subArea}-filter`}
+                      checked={subAreaFilters.includes(subArea!)}
+                      onCheckedChange={() => toggleSubAreaFilter(subArea!)}
+                    />
+                    <label
+                      htmlFor={`subarea-${subArea}-filter`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {subArea}
+                    </label>
+                  </div>
+                ))}
+              </ScrollArea>
             </div>
           </PopoverContent>
         </Popover>
@@ -99,28 +113,28 @@ const LockIn = () => {
           <PopoverTrigger asChild>
             <Button variant="outline" className="flex-1 justify-between">
               <span className="truncate">
-                {buildingTypeFilters.length === 0
-                  ? 'Type'
-                  : `${buildingTypeFilters.length} selected`}
+                {categoryFilters.length === 0
+                  ? 'Category'
+                  : `${categoryFilters.length} selected`}
               </span>
               <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-56 p-3" align="start">
             <div className="space-y-3">
-              <div className="font-medium text-sm">Building Type</div>
-              {['library', 'academic'].map((type) => (
-                <div key={type} className="flex items-center space-x-2">
+              <div className="font-medium text-sm">Category</div>
+              {uniqueCategories.map((category) => (
+                <div key={category} className="flex items-center space-x-2">
                   <Checkbox
-                    id={`type-${type}-filter`}
-                    checked={buildingTypeFilters.includes(type)}
-                    onCheckedChange={() => toggleBuildingTypeFilter(type)}
+                    id={`category-${category}-filter`}
+                    checked={categoryFilters.includes(category!)}
+                    onCheckedChange={() => toggleCategoryFilter(category!)}
                   />
                   <label
-                    htmlFor={`type-${type}-filter`}
-                    className="text-sm cursor-pointer capitalize"
+                    htmlFor={`category-${category}-filter`}
+                    className="text-sm cursor-pointer"
                   >
-                    {type === 'library' ? 'Libraries' : 'Academic'}
+                    {category}
                   </label>
                 </div>
               ))}
@@ -133,13 +147,13 @@ const LockIn = () => {
         <span className="text-muted-foreground">
           {filteredBuildings.length} results
         </span>
-        {(locationFilters.length > 0 || buildingTypeFilters.length > 0 || searchQuery) && (
+        {(subAreaFilters.length > 0 || categoryFilters.length > 0 || searchQuery) && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
-              setLocationFilters([]);
-              setBuildingTypeFilters([]);
+              setSubAreaFilters([]);
+              setCategoryFilters([]);
               setSearchQuery('');
             }}
           >
@@ -148,23 +162,23 @@ const LockIn = () => {
         )}
       </div>
 
-      {(locationFilters.length > 0 || buildingTypeFilters.length > 0) && (
+      {(subAreaFilters.length > 0 || categoryFilters.length > 0) && (
         <div className="flex flex-wrap gap-2">
-          {locationFilters.map((filter) => (
+          {subAreaFilters.map((filter) => (
             <Badge key={filter} variant="secondary" className="gap-1">
-              {filter} Campus
+              {filter}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => toggleLocationFilter(filter)}
+                onClick={() => toggleSubAreaFilter(filter)}
               />
             </Badge>
           ))}
-          {buildingTypeFilters.map((filter) => (
+          {categoryFilters.map((filter) => (
             <Badge key={filter} variant="secondary" className="gap-1">
-              {filter === 'library' ? 'Libraries' : 'Academic'}
+              {filter}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => toggleBuildingTypeFilter(filter)}
+                onClick={() => toggleCategoryFilter(filter)}
               />
             </Badge>
           ))}
@@ -183,7 +197,16 @@ const LockIn = () => {
 
           <ScrollArea className="flex-1">
             <div className="p-4 space-y-3">
-              {filteredBuildings.map((building) => (
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading buildings...
+                </div>
+              ) : filteredBuildings.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No buildings found matching your filters
+                </div>
+              ) : (
+                filteredBuildings.map((building) => (
                 <Card
                   key={building.id}
                   className={`p-4 cursor-pointer transition-all hover:shadow-md ${
@@ -218,12 +241,7 @@ const LockIn = () => {
                     </div>
                   </div>
                 </Card>
-              ))}
-
-              {filteredBuildings.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  No buildings found matching your filters
-                </div>
+              ))
               )}
             </div>
           </ScrollArea>
@@ -258,7 +276,16 @@ const LockIn = () => {
           {activeView === 'list' ? (
             <ScrollArea className="flex-1">
               <div className="p-4 space-y-3">
-                {filteredBuildings.map((building) => (
+                {loading ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Loading buildings...
+                  </div>
+                ) : filteredBuildings.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No buildings found matching your filters
+                  </div>
+                ) : (
+                  filteredBuildings.map((building) => (
                   <Card
                     key={building.id}
                     className={`p-4 cursor-pointer transition-all hover:shadow-md ${
@@ -293,12 +320,7 @@ const LockIn = () => {
                       </div>
                     </div>
                   </Card>
-                ))}
-
-                {filteredBuildings.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No buildings found matching your filters
-                  </div>
+                ))
                 )}
               </div>
             </ScrollArea>

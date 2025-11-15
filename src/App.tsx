@@ -18,6 +18,7 @@ import Events from "./pages/Events";
 import EventsMap from "./pages/EventsMap";
 import EventsList from "./pages/EventsList";
 import CreateEvent from "./pages/CreateEvent";
+import SeedData from "./pages/SeedData";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +102,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/seed-data"
+              element={
+                <ProtectedRoute>
+                  <SeedData />
                 </ProtectedRoute>
               }
             />

@@ -11,6 +11,9 @@ export interface Building {
   hours: string;
   status: AvailabilityStatus;
   floors: Floor[];
+  category?: string;
+  subArea?: string;
+  rooms?: BuildingRoom[];
 }
 
 export interface Floor {
@@ -26,6 +29,36 @@ export interface Room {
   status: 'available' | 'in-use' | 'reserved-soon';
   features: string[];
   nextAvailable?: string;
+}
+
+export interface BuildingRoom {
+  roomName: string;
+  capacity: number;
+  floor: string;
+  available?: boolean;
+}
+
+export interface DBBuilding {
+  id: string;
+  name: string;
+  category: string;
+  sub_area: string;
+  latitude: number;
+  longitude: number;
+  hours: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DBRoom {
+  id: string;
+  building_id: string;
+  room_name: string;
+  capacity: number;
+  floor: string;
+  available: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Event {

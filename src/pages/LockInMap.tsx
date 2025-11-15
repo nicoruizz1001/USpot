@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Building } from '@/types';
-import { mockBuildings } from '@/data/mockData';
+import { fetchBuildings } from '@/services/buildingsService';
 import { MapView } from '@/components/MapView';
 import { BuildingPanel } from '@/components/BuildingPanel';
 import { AppHeader } from '@/components/AppHeader';
@@ -10,7 +10,17 @@ import { useNavigate } from 'react-router-dom';
 
 const LockInMap = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    loadBuildings();
+  }, []);
+
+  const loadBuildings = async () => {
+    const data = await fetchBuildings();
+    setBuildings(data);
+  };
 
   const handleViewChange = (view: 'map' | 'list') => {
     if (view === 'list') {
@@ -25,7 +35,7 @@ const LockInMap = () => {
       <div className="relative flex-1 overflow-hidden pb-28 md:pb-0">
         <MapView
           mode="lock-in"
-          buildings={mockBuildings}
+          buildings={buildings}
           events={[]}
           onBuildingClick={setSelectedBuilding}
           onEventClick={() => {}}
