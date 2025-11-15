@@ -112,14 +112,14 @@ export const mockBuildings: Building[] = [
 export const mockEvents: Event[] = [
   {
     id: 'evt1',
-    title: 'Tech Talk: AI in Healthcare',
+    title: 'CS Department Mixer',
     building: 'Rice Hall',
     room: 'Auditorium',
     coordinates: [-78.5085, 38.0315],
     time: '6:00 PM',
     date: 'Today',
-    category: 'Tech',
-    description: 'Join us for an exciting discussion on artificial intelligence applications in modern healthcare.',
+    category: 'Social',
+    description: 'Join us for networking and mingling with CS faculty and students.',
     organization: {
       name: 'CS Club',
       description: 'University Computer Science student organization',
@@ -131,14 +131,14 @@ export const mockEvents: Event[] = [
   },
   {
     id: 'evt2',
-    title: 'Open Mic Night',
+    title: 'Live Jazz Night',
     building: 'Newcomb Hall',
     room: 'Theater',
     coordinates: [-78.5032, 38.0356],
     time: '8:00 PM',
     date: 'Tonight',
     category: 'Entertainment',
-    description: 'Showcase your talent! Poetry, music, comedy - all welcome.',
+    description: 'Enjoy an evening of live jazz performances by student musicians.',
     organization: {
       name: 'Student Activities',
       description: 'Creating memorable experiences for the UVA community',
@@ -149,36 +149,53 @@ export const mockEvents: Event[] = [
   },
   {
     id: 'evt3',
-    title: 'Study Session: Calc III',
-    building: 'Alderman Library',
-    room: '301',
+    title: 'Basketball Watch Party',
+    building: 'Memorial Gym',
+    room: 'Main Hall',
     coordinates: [-78.5055, 38.0366],
-    time: '4:00 PM',
+    time: '7:00 PM',
     date: 'Today',
-    category: 'Academic',
-    description: 'Group study session for Calc III midterm prep. All levels welcome!',
+    category: 'Sports',
+    description: 'Watch the big game with fellow students. Food and drinks provided!',
     organization: {
-      name: 'Math Study Group',
-      description: 'Peer-led math tutoring and study sessions',
+      name: 'Student Union',
+      description: 'Bringing the student community together',
       links: {}
     }
   },
   {
     id: 'evt4',
-    title: 'Sustainability Fair',
-    building: 'The Rotunda',
-    room: 'Lawn',
+    title: 'Study Break: Free Coffee',
+    building: 'Alderman Library',
+    room: 'Main Lobby',
     coordinates: [-78.5034, 38.0366],
-    time: '12:00 PM',
-    date: 'Tomorrow',
-    category: 'Community',
-    description: 'Learn about campus sustainability initiatives and how to get involved.',
+    time: '2:00 PM',
+    date: 'Today',
+    category: 'Academic',
+    description: 'Take a break from studying with free coffee and snacks.',
     organization: {
-      name: 'Green Initiative',
-      description: 'Leading sustainability efforts on Grounds',
+      name: 'Library Services',
+      description: 'Supporting student success',
       links: {
-        website: 'https://sustainability.virginia.edu',
-        instagram: 'https://instagram.com/uva_green'
+        website: 'https://library.virginia.edu'
+      }
+    }
+  },
+  {
+    id: 'evt5',
+    title: 'Poetry Slam',
+    building: 'Newcomb Hall',
+    room: 'Small Theater',
+    coordinates: [-78.5032, 38.0356],
+    time: '5:00 PM',
+    date: 'Today',
+    category: 'Arts',
+    description: 'Share your poetry or enjoy performances from talented student poets.',
+    organization: {
+      name: 'Creative Writing Club',
+      description: 'Fostering literary arts on campus',
+      links: {
+        instagram: 'https://instagram.com/uva_poetry'
       }
     }
   }
