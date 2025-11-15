@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Event } from '@/types';
 import { mockEvents } from '@/data/mockData';
 import { MapView } from '@/components/MapView';
@@ -140,7 +140,11 @@ const Events = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  const FilterSection = () => (
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  const FilterSection = memo(() => (
     <div className="p-4 border-b border-border space-y-4">
       {isLocationEnabled && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-2 rounded-lg">
@@ -154,7 +158,7 @@ const Events = () => {
         <Input
           placeholder="Search events..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           className="pl-10"
         />
       </div>
@@ -285,7 +289,7 @@ const Events = () => {
         </div>
       )}
     </div>
-  );
+  ));
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -383,9 +387,9 @@ const Events = () => {
           </div>
 
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
-            }`}
+            className={`transition-all duration-300 ease-in-out ${
+              isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+            } overflow-hidden`}
           >
             <FilterSection />
           </div>

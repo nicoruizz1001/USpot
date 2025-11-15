@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Building } from '@/types';
 import { fetchBuildings } from '@/services/buildingsService';
 import { MapView } from '@/components/MapView';
@@ -74,7 +74,11 @@ const LockIn = () => {
     );
   };
 
-  const FilterSection = () => (
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  const FilterSection = memo(() => (
     <div className="p-4 border-b border-border space-y-4">
       {isLocationEnabled && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-2 rounded-lg">
@@ -88,7 +92,7 @@ const LockIn = () => {
         <Input
           placeholder="Search buildings..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           className="pl-10"
         />
       </div>
@@ -205,7 +209,7 @@ const LockIn = () => {
         </div>
       )}
     </div>
-  );
+  ));
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -293,9 +297,9 @@ const LockIn = () => {
           </div>
 
           <div
-            className={`transition-all duration-300 ease-in-out overflow-hidden ${
-              isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
-            }`}
+            className={`transition-all duration-300 ease-in-out ${
+              isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
+            } overflow-hidden`}
           >
             <FilterSection />
           </div>
