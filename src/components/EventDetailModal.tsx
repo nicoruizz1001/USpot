@@ -26,9 +26,9 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
 
   const content = (
     <div className="flex flex-col h-full">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1 pr-8">
-          <h2 className="text-2xl font-bold text-foreground mb-2">{event.title}</h2>
+      <div className="flex items-start justify-between gap-2 mb-4">
+        <div className="flex-1 min-w-0 pr-2">
+          <h2 className="text-2xl font-bold text-foreground mb-2 break-words">{event.title}</h2>
           {event.image && (
             <div className="w-full h-48 rounded-lg overflow-hidden mb-4 bg-muted">
               <img
@@ -43,7 +43,7 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
           variant="ghost"
           size="icon"
           onClick={onClose}
-          className="absolute right-4 top-4 md:relative md:right-0 md:top-0"
+          className="absolute right-4 top-4 md:relative md:right-0 md:top-0 shrink-0"
         >
           <X className="w-5 h-5" />
         </Button>
@@ -52,39 +52,39 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
       <ScrollArea className="flex-1 -mx-6 px-6">
         <div className="space-y-6 pb-6">
           <div className="space-y-3">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 min-w-0">
               <Clock className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-foreground">{event.time}</p>
-                <p className="text-sm text-muted-foreground">{event.date}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground truncate">{event.time}</p>
+                <p className="text-sm text-muted-foreground truncate">{event.date}</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 min-w-0">
               <MapPin className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="font-medium text-foreground">{event.building}</p>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground break-words">{event.building}</p>
                 {event.room && (
-                  <p className="text-sm text-muted-foreground">{event.room}</p>
+                  <p className="text-sm text-muted-foreground truncate">{event.room}</p>
                 )}
               </div>
             </div>
 
-            <Badge variant="secondary" className="w-fit">
+            <Badge variant="secondary" className="w-fit whitespace-nowrap">
               {event.category}
             </Badge>
           </div>
 
           <div className="border-t border-border pt-4">
             <h3 className="font-semibold text-foreground mb-2">About</h3>
-            <p className="text-muted-foreground leading-relaxed">{event.description}</p>
+            <p className="text-muted-foreground leading-relaxed break-words">{event.description}</p>
           </div>
 
           {event.organization && (
             <div className="border-t border-border pt-4">
               <h3 className="font-semibold text-foreground mb-3">Hosted by</h3>
               <div className="bg-muted rounded-lg p-4 space-y-3">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 min-w-0">
                   {event.organization.logo && (
                     <div className="w-12 h-12 rounded-full bg-background flex items-center justify-center overflow-hidden flex-shrink-0">
                       <img
@@ -94,10 +94,10 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
                       />
                     </div>
                   )}
-                  <div className="flex-1">
-                    <div className="font-medium text-foreground">{event.organization.name}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-foreground truncate">{event.organization.name}</div>
                     {event.organization.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1 break-words">
                         {event.organization.description}
                       </p>
                     )}
