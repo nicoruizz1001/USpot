@@ -43,62 +43,60 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
 
   return (
     <header className="w-full bg-background border-b border-border">
-      <div className="container mx-auto flex h-20 items-center justify-between px-6">
-        <div className="flex items-center gap-8">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-          >
-            <div className="bg-blue-600 text-white rounded-2xl p-3 shadow-md">
-              <MapPin className="w-7 h-7" />
-            </div>
-            <div className="flex flex-col items-start">
-              <span className="text-2xl font-bold text-foreground">Uspot</span>
-              <span className="text-sm text-muted-foreground">Campus Navigation</span>
-            </div>
-          </button>
+      <div className="container mx-auto h-20 px-6 flex items-center">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <div className="bg-blue-600 text-white rounded-2xl p-3 shadow-md">
+            <MapPin className="w-7 h-7" />
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="text-2xl font-bold text-foreground">Uspot</span>
+            <span className="text-sm text-muted-foreground">Campus Navigation</span>
+          </div>
+        </button>
 
-          {showNavTabs && (
-            <nav className="hidden md:flex items-center gap-2">
-              <Button
-                variant={isLockInActive ? 'default' : 'ghost'}
-                onClick={() => navigate('/lock-in')}
-                className={cn(
-                  'px-6',
-                  isLockInActive && 'bg-blue-600 hover:bg-blue-700'
-                )}
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                Lock-in
-              </Button>
-              <Button
-                variant={isCreateActive ? 'default' : 'ghost'}
-                onClick={() => navigate('/create')}
-                className={cn(
-                  'px-6',
-                  isCreateActive && 'bg-blue-600 hover:bg-blue-700'
-                )}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create
-              </Button>
-              <Button
-                variant={isEventsActive ? 'default' : 'ghost'}
-                onClick={() => navigate('/events')}
-                className={cn(
-                  'px-6',
-                  isEventsActive && 'bg-blue-600 hover:bg-blue-700'
-                )}
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Events
-              </Button>
-            </nav>
-          )}
-        </div>
+        {showNavTabs && (
+          <nav className="hidden md:flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+            <Button
+              variant={isLockInActive ? 'default' : 'ghost'}
+              onClick={() => navigate('/lock-in')}
+              className={cn(
+                'px-6',
+                isLockInActive && 'bg-blue-600 hover:bg-blue-700'
+              )}
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              Lock-in
+            </Button>
+            <Button
+              variant={isCreateActive ? 'default' : 'ghost'}
+              onClick={() => navigate('/create')}
+              className={cn(
+                'px-6',
+                isCreateActive && 'bg-blue-600 hover:bg-blue-700'
+              )}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create
+            </Button>
+            <Button
+              variant={isEventsActive ? 'default' : 'ghost'}
+              onClick={() => navigate('/events')}
+              className={cn(
+                'px-6',
+                isEventsActive && 'bg-blue-600 hover:bg-blue-700'
+              )}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Events
+            </Button>
+          </nav>
+        )}
 
         {!hideActions && (
-          <div className="flex items-center gap-4">
+          <div className="ml-auto flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
