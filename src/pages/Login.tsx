@@ -15,15 +15,19 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
-  const { signIn, profile, updateProfile } = useAuth();
+  const { signIn, profile, updateProfile, user } = useAuth();
   const { enableLocation } = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (profile && !profile.location_permission_asked) {
-      setShowLocationDialog(true);
+    if (user && profile) {
+      if (!profile.location_permission_asked) {
+        setShowLocationDialog(true);
+      } else {
+        navigate('/');
+      }
     }
-  }, [profile]);
+  }, [user, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
