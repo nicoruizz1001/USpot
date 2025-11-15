@@ -1,11 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { ViewMode, Building, Event } from '@/types';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Info } from 'lucide-react';
 
 interface MapViewProps {
   mode: ViewMode;
@@ -19,11 +15,10 @@ export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
-  const [apiKey, setApiKey] = useState('');
-  const [needsKey, setNeedsKey] = useState(true);
+  const apiKey = 'pk.eyJ1Ijoibmljb3J1aXp6MTAwMSIsImEiOiJjbWh6aXozeXAwbTFtMmlvaTYzZXA0cnZ0In0.WOsJcjx468DrPXKYOcTCxg';
 
   useEffect(() => {
-    if (!mapContainer.current || !apiKey) return;
+    if (!mapContainer.current) return;
 
     try {
       mapboxgl.accessToken = apiKey;
@@ -40,8 +35,6 @@ export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick
         new mapboxgl.NavigationControl({ visualizePitch: true }),
         'top-right'
       );
-
-      setNeedsKey(false);
     } catch (error) {
       console.error('Error initializing map:', error);
     }
@@ -51,7 +44,7 @@ export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick
       markers.current = [];
       map.current?.remove();
     };
-  }, [apiKey]);
+  }, []);
 
   useEffect(() => {
     if (!map.current) return;
@@ -129,32 +122,6 @@ export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick
       });
     }
   }, [mode, buildings, events, onBuildingClick, onEventClick]);
-
-  if (needsKey) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-muted p-8">
-        <Card className="max-w-md w-full p-6 space-y-4">
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              To view the interactive campus map, please enter your Mapbox public token.
-              You can get one free at <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="underline text-primary">mapbox.com</a>
-            </AlertDescription>
-          </Alert>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Mapbox Public Token</label>
-            <Input
-              type="text"
-              placeholder="pk.eyJ1IjoiZXhhbXBsZS..."
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="font-mono text-sm"
-            />
-          </div>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="relative w-full h-full">
