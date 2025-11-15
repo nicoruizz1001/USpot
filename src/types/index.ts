@@ -86,3 +86,43 @@ export interface Organization {
     doorlist?: string;
   };
 }
+
+export type BookingStatus = 'confirmed' | 'cancelled' | 'completed' | 'no-show';
+
+export interface Booking {
+  id: string;
+  user_id: string;
+  room_id: string;
+  building_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+  status: BookingStatus;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  room?: DBRoom;
+  building?: DBBuilding;
+}
+
+export interface CreateBookingInput {
+  room_id: string;
+  building_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  duration_minutes: number;
+  notes?: string;
+}
+
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
+
+export interface RoomWithAvailability extends DBRoom {
+  timeSlots?: TimeSlot[];
+  isFullyBooked?: boolean;
+}

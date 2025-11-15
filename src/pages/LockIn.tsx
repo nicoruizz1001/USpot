@@ -3,6 +3,7 @@ import { Building } from '@/types';
 import { fetchBuildings } from '@/services/buildingsService';
 import { MapView } from '@/components/MapView';
 import { BuildingPanel } from '@/components/BuildingPanel';
+import { RoomBookingModal } from '@/components/RoomBookingModal';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search, MapPin, Users, ChevronDown, X } from 'lucide-react';
+import { Search, MapPin, Users, ChevronDown, X, Menu } from 'lucide-react';
 
 const LockIn = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
@@ -22,6 +23,9 @@ const LockIn = () => {
   const [activeView, setActiveView] = useState<'map' | 'list'>('list');
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [buildingForBooking, setBuildingForBooking] = useState<Building | null>(null);
 
   useEffect(() => {
     loadBuildings();
@@ -248,7 +252,34 @@ const LockIn = () => {
         </div>
 
         <div className="md:hidden flex-1 flex flex-col">
-          <FilterSection />
+          <div className="border-b border-border bg-background">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="w-full py-3 flex items-center justify-between px-4 hover:bg-accent"
+            >
+              <div className="flex items-center gap-2">
+                <Menu className="w-5 h-5" />
+                <span className="font-medium">
+                  {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+                </span>
+              </div>
+              {(categoryFilters.length > 0 || subAreaFilters.length > 0) && (
+                <Badge variant="secondary" className="ml-2">
+                  {categoryFilters.length + subAreaFilters.length}
+                </Badge>
+              )}
+            </Button>
+          </div>
+
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              isFilterOpen ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
+            <FilterSection />
+          </div>
 
           <div className="flex border-b border-border bg-background">
             <button
@@ -291,7 +322,10 @@ const LockIn = () => {
                     className={`p-4 cursor-pointer transition-all hover:shadow-md ${
                       selectedBuilding?.id === building.id ? 'ring-2 ring-blue-600' : ''
                     }`}
-                    onClick={() => setSelectedBuilding(building)}
+                    onClick={() => {
+                      setBuildingForBooking(building);
+                      setShowBookingModal(true);
+                    }}
                   >
                     <div className="flex items-start gap-3">
                       <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
@@ -361,6 +395,18 @@ const LockIn = () => {
           )}
         </div>
       </div>
+
+      <RoomBookingModal
+        building={buildingForBooking}
+        open={showBookingModal}
+        onClose={() => {
+          setShowBookingModal(false);
+          setBuildingForBooking(null);
+        }}
+        onBookingSuccess={() => {
+          loadBuildings();
+        }}
+      />
 
       <BottomNavigation />
     </div>

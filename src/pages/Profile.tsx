@@ -7,15 +7,17 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
-import { User, Mail, Calendar, MapPin, Navigation, RefreshCw } from 'lucide-react';
+import { User, Mail, Calendar, MapPin, Navigation, RefreshCw, CalendarCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppHeader } from '@/components/AppHeader';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const { user, profile, updateProfile } = useAuth();
   const { userLocation, isLocationEnabled, isLoading: locationLoading, enableLocation, disableLocation, refreshLocation } = useLocation();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +101,14 @@ const Profile = () => {
                 <Calendar className="w-4 h-4" />
                 <span>Joined {new Date(profile?.created_at || '').toLocaleDateString()}</span>
               </div>
+              <Button
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => navigate('/bookings')}
+              >
+                <CalendarCheck className="w-4 h-4 mr-2" />
+                My Bookings
+              </Button>
             </CardContent>
           </Card>
 
