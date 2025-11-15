@@ -71,10 +71,8 @@ const EventsList = () => {
   };
 
   const handleEventClick = (event: Event) => {
-    console.log('Event clicked:', event.title);
     setSelectedEvent(event);
     setIsModalOpen(true);
-    console.log('Modal state set to true');
   };
 
   const handleNavigate = async (event: Event) => {

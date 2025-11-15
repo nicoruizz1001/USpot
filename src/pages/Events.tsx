@@ -2,7 +2,10 @@ import { useState, useEffect, useMemo } from 'react';
 import { Event } from '@/types';
 import { mockEvents } from '@/data/mockData';
 import { MapView } from '@/components/MapView';
-import { EventPanel } from '@/components/EventPanel';
+import { EventDetailModal } from '@/components/EventDetailModal';
+import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { DistanceBadge } from '@/components/DistanceBadge';
@@ -28,7 +31,14 @@ const Events = () => {
   const [sortBy, setSortBy] = useState<'date' | 'distance'>('date');
   const [maxDistance, setMaxDistance] = useState<number>(10);
   const [showDistanceFilter, setShowDistanceFilter] = useState(false);
-  const { userLocation, isLocationEnabled } = useLocation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [navigationDestination, setNavigationDestination] = useState<{
+    coordinates: [number, number];
+    name: string;
+  } | null>(null);
+  const { userLocation, isLocationEnabled, enableLocation } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEvents();
@@ -292,7 +302,10 @@ const Events = () => {
                   className={`p-4 cursor-pointer transition-all hover:shadow-md ${
                     selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
                   }`}
-                  onClick={() => setSelectedEvent(event)}
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setIsModalOpen(true);
+                  }}
                 >
                   <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
@@ -381,7 +394,10 @@ const Events = () => {
                     className={`p-4 cursor-pointer transition-all hover:shadow-md ${
                       selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
                     }`}
-                    onClick={() => setSelectedEvent(event)}
+                    onClick={() => {
+                    setSelectedEvent(event);
+                    setIsModalOpen(true);
+                  }}
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
@@ -440,16 +456,16 @@ const Events = () => {
                 buildings={[]}
                 events={filteredEvents}
                 onBuildingClick={() => {}}
-                onEventClick={setSelectedEvent}
+                onEventClick={(event) => {
+                  if (!navigationDestination) {
+                    setSelectedEvent(event);
+                    setIsModalOpen(true);
+                  }
+                }}
                 userLocation={userLocation}
+                navigationDestination={navigationDestination}
+                onExitNavigation={() => setNavigationDestination(null)}
               />
-
-              {selectedEvent && (
-                <EventPanel
-                  event={selectedEvent}
-                  onClose={() => setSelectedEvent(null)}
-                />
-              )}
             </div>
           )}
         </div>
@@ -460,18 +476,65 @@ const Events = () => {
             buildings={[]}
             events={filteredEvents}
             onBuildingClick={() => {}}
-            onEventClick={setSelectedEvent}
+            onEventClick={(event) => {
+              if (!navigationDestination) {
+                setSelectedEvent(event);
+                setIsModalOpen(true);
+              }
+            }}
             userLocation={userLocation}
+            navigationDestination={navigationDestination}
+            onExitNavigation={() => setNavigationDestination(null)}
           />
-
-          {selectedEvent && (
-            <EventPanel
-              event={selectedEvent}
-              onClose={() => setSelectedEvent(null)}
-            />
-          )}
         </div>
       </div>
+
+      <EventDetailModal
+        event={selectedEvent}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedEvent(null);
+        }}
+        onNavigate={async (event) => {
+          if (!isLocationEnabled) {
+            setShowLocationDialog(true);
+            return;
+          }
+
+          setIsModalOpen(false);
+          setNavigationDestination({
+            coordinates: event.coordinates,
+            name: event.title
+          });
+          if (activeView === 'list') {
+            setActiveView('map');
+          }
+        }}
+      />
+
+      <LocationPermissionDialog
+        open={showLocationDialog}
+        onOpenChange={setShowLocationDialog}
+        onEnable={async () => {
+          try {
+            await enableLocation();
+            setShowLocationDialog(false);
+            if (selectedEvent) {
+              setIsModalOpen(false);
+              setNavigationDestination({
+                coordinates: selectedEvent.coordinates,
+                name: selectedEvent.title
+              });
+              if (activeView === 'list') {
+                setActiveView('map');
+              }
+            }
+          } catch (error) {
+            toast.error('Unable to access location. Please enable location permissions in your browser settings.');
+          }
+        }}
+      />
 
       <BottomNavigation />
     </div>

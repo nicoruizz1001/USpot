@@ -17,8 +17,6 @@ interface EventDetailModalProps {
 export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDetailModalProps) => {
   const isMobile = useIsMobile();
 
-  console.log('EventDetailModal render:', { event: event?.title, isOpen, isMobile });
-
   if (!event) return null;
 
   const handleNavigate = () => {
