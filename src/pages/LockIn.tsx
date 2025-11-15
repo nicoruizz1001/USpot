@@ -118,17 +118,17 @@ const LockIn = () => {
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
                           <Users className="w-3 h-3 mr-1" />
-                          {building.rooms.length} rooms
+                          {building.rooms?.length || 0} rooms
                         </Badge>
                         <Badge
                           variant={
-                            building.rooms.filter((r) => r.available).length > 0
+                            (building.rooms?.filter((r) => r.available).length || 0) > 0
                               ? 'default'
                               : 'secondary'
                           }
                           className="text-xs"
                         >
-                          {building.rooms.filter((r) => r.available).length} available
+                          {building.rooms?.filter((r) => r.available).length || 0} available
                         </Badge>
                       </div>
                     </div>
