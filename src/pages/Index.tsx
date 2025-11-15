@@ -5,6 +5,7 @@ import { MapView } from '@/components/MapView';
 import { ModeToggle } from '@/components/ModeToggle';
 import { BuildingPanel } from '@/components/BuildingPanel';
 import { EventPanel } from '@/components/EventPanel';
+import { AppHeader } from '@/components/AppHeader';
 
 const Index = () => {
   const [mode, setMode] = useState<ViewMode>('lock-in');
@@ -18,38 +19,42 @@ const Index = () => {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-background">
-      <ModeToggle mode={mode} onModeChange={handleModeChange} />
-      
-      <MapView
-        mode={mode}
-        buildings={mockBuildings}
-        events={mockEvents}
-        onBuildingClick={setSelectedBuilding}
-        onEventClick={setSelectedEvent}
-      />
+    <div className="flex flex-col h-screen bg-background">
+      <AppHeader />
 
-      {selectedBuilding && (
-        <BuildingPanel
-          building={selectedBuilding}
-          onClose={() => setSelectedBuilding(null)}
+      <div className="relative flex-1 overflow-hidden">
+        <ModeToggle mode={mode} onModeChange={handleModeChange} />
+
+        <MapView
+          mode={mode}
+          buildings={mockBuildings}
+          events={mockEvents}
+          onBuildingClick={setSelectedBuilding}
+          onEventClick={setSelectedEvent}
         />
-      )}
 
-      {selectedEvent && (
-        <EventPanel
-          event={selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-        />
-      )}
+        {selectedBuilding && (
+          <BuildingPanel
+            building={selectedBuilding}
+            onClose={() => setSelectedBuilding(null)}
+          />
+        )}
 
-      <div className="absolute bottom-6 left-6 bg-card rounded-lg shadow-lg p-4 max-w-xs z-10 border border-border">
-        <h3 className="font-bold text-foreground mb-1">GroundsMap</h3>
-        <p className="text-sm text-muted-foreground">
-          {mode === 'lock-in' 
-            ? 'Find available study spaces and rooms across campus'
-            : 'Discover events happening around Grounds'}
-        </p>
+        {selectedEvent && (
+          <EventPanel
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
+
+        <div className="absolute bottom-6 left-6 bg-card rounded-lg shadow-lg p-4 max-w-xs z-10 border border-border">
+          <h3 className="font-bold text-foreground mb-1">Uspot</h3>
+          <p className="text-sm text-muted-foreground">
+            {mode === 'lock-in'
+              ? 'Find available study spaces and rooms across campus'
+              : 'Discover events happening around Grounds'}
+          </p>
+        </div>
       </div>
     </div>
   );
