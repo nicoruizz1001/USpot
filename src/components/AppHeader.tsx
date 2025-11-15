@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -10,8 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MapPin, User, LogOut, Calendar, Plus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, User, LogOut, Calendar, Plus, CalendarCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getUpcomingBookingsCount } from '@/services/bookingsService';
 
 interface AppHeaderProps {
   hideActions?: boolean;
@@ -22,6 +25,8 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [bookingsCount, setBookingsCount] = useState<number>(0);
+  const [loadingCount, setLoadingCount] = useState(true);
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,6 +45,24 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
   const isLockInActive = location.pathname.startsWith('/lock-in');
   const isEventsActive = location.pathname.startsWith('/events');
   const isCreateActive = location.pathname === '/create';
+
+  useEffect(() => {
+    if (user) {
+      loadBookingsCount();
+    }
+  }, [user, location.pathname]);
+
+  const loadBookingsCount = async () => {
+    setLoadingCount(true);
+    try {
+      const count = await getUpcomingBookingsCount();
+      setBookingsCount(count);
+    } catch (error) {
+      console.error('Error loading bookings count:', error);
+    } finally {
+      setLoadingCount(false);
+    }
+  };
 
   return (
     <header className="w-full bg-background border-b border-border">
@@ -120,6 +143,15 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
                 <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/bookings')} className="cursor-pointer">
+                  <CalendarCheck className="mr-2 h-4 w-4" />
+                  <span>My Bookings</span>
+                  {!loadingCount && bookingsCount > 0 && (
+                    <Badge variant="secondary" className="ml-auto text-xs">
+                      {bookingsCount}
+                    </Badge>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">

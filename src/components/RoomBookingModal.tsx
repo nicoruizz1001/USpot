@@ -186,7 +186,7 @@ export const RoomBookingModal = ({ building, open, onClose, onBookingSuccess }: 
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 flex flex-col overflow-hidden">
         <DialogHeader className="p-6 pb-4 border-b border-border">
           <DialogTitle className="text-2xl">{building.name}</DialogTitle>
           <DialogDescription>
@@ -201,8 +201,8 @@ export const RoomBookingModal = ({ building, open, onClose, onBookingSuccess }: 
         </DialogHeader>
 
         {step === 'room-selection' ? (
-          <div className="flex flex-col h-full">
-            <div className="p-4 space-y-4 border-b border-border">
+          <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+            <div className="p-4 space-y-4 border-b border-border flex-shrink-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -247,22 +247,24 @@ export const RoomBookingModal = ({ building, open, onClose, onBookingSuccess }: 
               </div>
 
               {floorFilter.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {floorFilter.map(floor => (
-                    <Badge key={floor} variant="secondary" className="gap-1">
-                      Floor {floor}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => toggleFloorFilter(floor)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
+                <ScrollArea className="w-full" orientation="horizontal">
+                  <div className="flex gap-2 pb-2">
+                    {floorFilter.map(floor => (
+                      <Badge key={floor} variant="secondary" className="gap-1 whitespace-nowrap flex-shrink-0">
+                        Floor {floor}
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => toggleFloorFilter(floor)}
+                        />
+                      </Badge>
+                    ))}
+                  </div>
+                </ScrollArea>
               )}
             </div>
 
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-3">
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="p-4 space-y-3">
                 {loading ? (
                   <div className="text-center py-8 text-muted-foreground">
                     Loading rooms...
@@ -313,7 +315,8 @@ export const RoomBookingModal = ({ building, open, onClose, onBookingSuccess }: 
             </ScrollArea>
           </div>
         ) : (
-          <div className="p-6 space-y-6">
+          <ScrollArea className="overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+            <div className="p-6 space-y-6">
             <div className="bg-muted p-4 rounded-lg">
               <div className="font-semibold text-foreground mb-1">
                 {selectedRoom?.room_name}
@@ -416,7 +419,8 @@ export const RoomBookingModal = ({ building, open, onClose, onBookingSuccess }: 
                 {submitting ? 'Booking...' : 'Confirm Booking'}
               </Button>
             </div>
-          </div>
+            </div>
+          </ScrollArea>
         )}
       </DialogContent>
     </Dialog>

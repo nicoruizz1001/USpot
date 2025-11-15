@@ -287,3 +287,28 @@ export const calculateDuration = (startTime: string, endTime: string): number =>
 
   return endMinutes - startMinutes;
 };
+
+export const getUpcomingBookingsCount = async (): Promise<number> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return 0;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const { count, error } = await supabase
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('booking_date', today)
+      .eq('status', 'confirmed');
+
+    if (error) throw error;
+    return count || 0;
+  } catch (error) {
+    console.error('Error fetching upcoming bookings count:', error);
+    return 0;
+  }
+};
