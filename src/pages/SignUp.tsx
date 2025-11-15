@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
 import { MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -13,7 +15,9 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const { signUp, updateProfile } = useAuth();
+  const { enableLocation } = useLocation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,8 +31,14 @@ const SignUp = () => {
       setLoading(false);
     } else {
       toast.success('Account created successfully!');
-      navigate('/');
+      setLoading(false);
+      setShowLocationDialog(true);
     }
+  };
+
+  const handleSkipLocation = async () => {
+    await updateProfile({ location_permission_asked: true });
+    navigate('/');
   };
 
   return (
@@ -98,6 +108,16 @@ const SignUp = () => {
           </div>
         </CardFooter>
       </Card>
+
+      <LocationPermissionDialog
+        open={showLocationDialog}
+        onOpenChange={setShowLocationDialog}
+        onEnableLocation={async () => {
+          await enableLocation();
+          navigate('/');
+        }}
+        onSkip={handleSkipLocation}
+      />
     </div>
   );
 };

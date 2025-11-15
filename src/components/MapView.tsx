@@ -9,12 +9,14 @@ interface MapViewProps {
   events: Event[];
   onBuildingClick: (building: Building) => void;
   onEventClick: (event: Event) => void;
+  userLocation?: { latitude: number; longitude: number } | null;
 }
 
-export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick }: MapViewProps) => {
+export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick, userLocation }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
+  const userMarker = useRef<mapboxgl.Marker | null>(null);
   const apiKey = 'pk.eyJ1Ijoibmljb3J1aXp6MTAwMSIsImEiOiJjbWh6aXozeXAwbTFtMmlvaTYzZXA0cnZ0In0.WOsJcjx468DrPXKYOcTCxg';
 
   useEffect(() => {
@@ -42,9 +44,35 @@ export const MapView = ({ mode, buildings, events, onBuildingClick, onEventClick
     return () => {
       markers.current.forEach(marker => marker.remove());
       markers.current = [];
+      userMarker.current?.remove();
       map.current?.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (!map.current || !userLocation) return;
+
+    if (userMarker.current) {
+      userMarker.current.remove();
+    }
+
+    const el = document.createElement('div');
+    el.className = 'cursor-default';
+    el.innerHTML = `
+      <div class="relative">
+        <div class="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-lg animate-pulse"></div>
+        <div class="absolute inset-0 w-4 h-4 rounded-full bg-blue-400 opacity-30 animate-ping"></div>
+      </div>
+    `;
+
+    userMarker.current = new mapboxgl.Marker({ element: el })
+      .setLngLat([userLocation.longitude, userLocation.latitude])
+      .setPopup(
+        new mapboxgl.Popup({ offset: 15 })
+          .setHTML('<div class="p-2"><p class="font-medium">Your Location</p></div>')
+      )
+      .addTo(map.current);
+  }, [userLocation]);
 
   useEffect(() => {
     if (!map.current) return;

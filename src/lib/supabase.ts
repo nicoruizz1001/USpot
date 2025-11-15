@@ -10,6 +10,11 @@ export type Profile = {
   email: string;
   full_name: string;
   avatar_url?: string;
+  latitude?: number;
+  longitude?: number;
+  location_enabled?: boolean;
+  location_permission_asked?: boolean;
+  last_location_update?: string;
   created_at: string;
   updated_at: string;
 };

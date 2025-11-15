@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
 import { MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -12,8 +14,16 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const { signIn, profile, updateProfile } = useAuth();
+  const { enableLocation } = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (profile && !profile.location_permission_asked) {
+      setShowLocationDialog(true);
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +36,13 @@ const Login = () => {
       setLoading(false);
     } else {
       toast.success('Welcome back!');
-      navigate('/');
+      setLoading(false);
     }
+  };
+
+  const handleSkipLocation = async () => {
+    await updateProfile({ location_permission_asked: true });
+    navigate('/');
   };
 
   return (
@@ -82,6 +97,16 @@ const Login = () => {
           </div>
         </CardFooter>
       </Card>
+
+      <LocationPermissionDialog
+        open={showLocationDialog}
+        onOpenChange={setShowLocationDialog}
+        onEnableLocation={async () => {
+          await enableLocation();
+          navigate('/');
+        }}
+        onSkip={handleSkipLocation}
+      />
     </div>
   );
 };

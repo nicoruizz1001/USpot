@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from '@/contexts/LocationContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Mail, Calendar } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { User, Mail, Calendar, MapPin, Navigation, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { AppHeader } from '@/components/AppHeader';
 
 const Profile = () => {
   const { user, profile, updateProfile } = useAuth();
+  const { userLocation, isLocationEnabled, isLoading: locationLoading, enableLocation, disableLocation, refreshLocation } = useLocation();
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +38,33 @@ const Profile = () => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleLocationToggle = async (enabled: boolean) => {
+    try {
+      if (enabled) {
+        await enableLocation();
+        toast.success('Location enabled successfully!');
+      } else {
+        await disableLocation();
+        toast.success('Location disabled');
+      }
+    } catch (error: any) {
+      if (error?.code === 1) {
+        toast.error('Location permission denied. Please enable it in your browser settings.');
+      } else {
+        toast.error('Failed to update location settings');
+      }
+    }
+  };
+
+  const handleRefreshLocation = async () => {
+    try {
+      await refreshLocation();
+      toast.success('Location updated!');
+    } catch (error) {
+      toast.error('Failed to refresh location');
+    }
   };
 
   return (
@@ -72,42 +102,120 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Edit Profile</CardTitle>
-              <CardDescription>Update your profile information</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Enter your full name"
+          <div className="md:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Edit Profile</CardTitle>
+                <CardDescription>Update your profile information</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={user?.email || ''}
+                      disabled
+                      className="bg-muted"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Email cannot be changed
+                    </p>
+                  </div>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Location Services</CardTitle>
+                <CardDescription>
+                  Enable location to discover events near you
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="location-toggle" className="text-base">
+                      Enable Location Tracking
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Allow the app to access your location
+                    </p>
+                  </div>
+                  <Switch
+                    id="location-toggle"
+                    checked={isLocationEnabled}
+                    onCheckedChange={handleLocationToggle}
+                    disabled={locationLoading}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={user?.email || ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Email cannot be changed
-                  </p>
-                </div>
-                <Button type="submit" disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+
+                {isLocationEnabled && userLocation && (
+                  <div className="space-y-3 pt-4 border-t">
+                    <div className="flex items-start gap-3">
+                      <div className="rounded-full bg-blue-100 p-2">
+                        <Navigation className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">Current Location</p>
+                        <p className="text-xs text-muted-foreground">
+                          Lat: {userLocation.latitude.toFixed(6)}, Lon: {userLocation.longitude.toFixed(6)}
+                        </p>
+                        {profile?.last_location_update && (
+                          <p className="text-xs text-muted-foreground">
+                            Last updated: {new Date(profile.last_location_update).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleRefreshLocation}
+                      disabled={locationLoading}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${locationLoading ? 'animate-spin' : ''}`} />
+                      Refresh Location
+                    </Button>
+
+                    <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="w-4 h-4 text-blue-600 mt-0.5" />
+                        <p className="text-xs text-muted-foreground">
+                          Your location is updated automatically as you move to provide accurate event suggestions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!isLocationEnabled && (
+                  <div className="bg-muted p-3 rounded-lg">
+                    <p className="text-xs text-muted-foreground">
+                      Enable location services to see events near you and filter by distance.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

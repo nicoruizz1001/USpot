@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Event } from '@/types';
 import { mockEvents } from '@/data/mockData';
 import { MapView } from '@/components/MapView';
 import { EventPanel } from '@/components/EventPanel';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNavigation } from '@/components/BottomNavigation';
+import { DistanceBadge } from '@/components/DistanceBadge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,8 +13,11 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search, Calendar, Clock, MapPin, ChevronDown, X } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useLocation } from '@/contexts/LocationContext';
+import { calculateDistance, sortByDistance, filterByDistance } from '@/utils/distance';
 
 const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -21,6 +25,10 @@ const Events = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
   const [activeView, setActiveView] = useState<'map' | 'list'>('list');
+  const [sortBy, setSortBy] = useState<'date' | 'distance'>('date');
+  const [maxDistance, setMaxDistance] = useState<number>(10);
+  const [showDistanceFilter, setShowDistanceFilter] = useState(false);
+  const { userLocation, isLocationEnabled } = useLocation();
 
   useEffect(() => {
     fetchEvents();
@@ -66,16 +74,42 @@ const Events = () => {
     }
   };
 
-  const filteredEvents = allEvents.filter((event) => {
-    const matchesSearch =
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.building.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      categoryFilters.length === 0 ||
-      categoryFilters.some(filter => event.category.toLowerCase() === filter.toLowerCase());
+  const eventsWithDistance = useMemo(() => {
+    if (!userLocation || !isLocationEnabled) {
+      return allEvents;
+    }
 
-    return matchesSearch && matchesCategory;
-  });
+    return allEvents.map(event => ({
+      ...event,
+      distance: calculateDistance(
+        { latitude: userLocation.latitude, longitude: userLocation.longitude },
+        { latitude: event.coordinates[1], longitude: event.coordinates[0] }
+      )
+    }));
+  }, [allEvents, userLocation, isLocationEnabled]);
+
+  const filteredEvents = useMemo(() => {
+    let events = eventsWithDistance.filter((event) => {
+      const matchesSearch =
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        event.building.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        categoryFilters.length === 0 ||
+        categoryFilters.some(filter => event.category.toLowerCase() === filter.toLowerCase());
+
+      return matchesSearch && matchesCategory;
+    });
+
+    if (showDistanceFilter && isLocationEnabled) {
+      events = filterByDistance(events, maxDistance);
+    }
+
+    if (sortBy === 'distance' && isLocationEnabled) {
+      events = sortByDistance(events);
+    }
+
+    return events;
+  }, [eventsWithDistance, searchQuery, categoryFilters, sortBy, showDistanceFilter, maxDistance, isLocationEnabled]);
 
   const toggleCategoryFilter = (value: string) => {
     setCategoryFilters(prev =>
@@ -97,6 +131,13 @@ const Events = () => {
 
   const FilterSection = () => (
     <div className="p-4 border-b border-border space-y-4">
+      {isLocationEnabled && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-2 rounded-lg">
+          <Navigation className="w-4 h-4 text-blue-600" />
+          <span>Location enabled - showing distances</span>
+        </div>
+      )}
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
@@ -147,17 +188,65 @@ const Events = () => {
         </PopoverContent>
       </Popover>
 
+      {isLocationEnabled && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSortBy(sortBy === 'date' ? 'distance' : 'date')}
+              className="flex items-center gap-2"
+            >
+              <ArrowUpDown className="w-4 h-4" />
+              Sort by {sortBy === 'date' ? 'Distance' : 'Date'}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDistanceFilter(!showDistanceFilter)}
+            >
+              <MapPin className="w-4 h-4 mr-1" />
+              {showDistanceFilter ? 'Hide' : 'Show'} Distance Filter
+            </Button>
+          </div>
+
+          {showDistanceFilter && (
+            <div className="space-y-2 p-3 bg-muted rounded-lg">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">Max Distance</span>
+                <span className="text-muted-foreground">{maxDistance} mi</span>
+              </div>
+              <Slider
+                value={[maxDistance]}
+                onValueChange={(value) => setMaxDistance(value[0])}
+                min={0.5}
+                max={20}
+                step={0.5}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>0.5 mi</span>
+                <span>20 mi</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
           {filteredEvents.length} results
         </span>
-        {(categoryFilters.length > 0 || searchQuery) && (
+        {(categoryFilters.length > 0 || searchQuery || showDistanceFilter) && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => {
               setCategoryFilters([]);
               setSearchQuery('');
+              setShowDistanceFilter(false);
+              setMaxDistance(10);
+              setSortBy('date');
             }}
           >
             Clear filters
@@ -230,6 +319,11 @@ const Events = () => {
                           {event.building} {event.room && `- ${event.room}`}
                         </span>
                       </div>
+                      {isLocationEnabled && event.distance !== undefined && (
+                        <div className="flex items-center gap-2">
+                          <DistanceBadge distance={event.distance} />
+                        </div>
+                      )}
                     </div>
 
                     {event.organization.name && (
@@ -314,6 +408,11 @@ const Events = () => {
                             {event.building} {event.room && `- ${event.room}`}
                           </span>
                         </div>
+                        {isLocationEnabled && event.distance !== undefined && (
+                          <div className="flex items-center gap-2">
+                            <DistanceBadge distance={event.distance} />
+                          </div>
+                        )}
                       </div>
 
                       {event.organization.name && (
@@ -342,6 +441,7 @@ const Events = () => {
                 events={filteredEvents}
                 onBuildingClick={() => {}}
                 onEventClick={setSelectedEvent}
+                userLocation={userLocation}
               />
 
               {selectedEvent && (
@@ -361,6 +461,7 @@ const Events = () => {
             events={filteredEvents}
             onBuildingClick={() => {}}
             onEventClick={setSelectedEvent}
+            userLocation={userLocation}
           />
 
           {selectedEvent && (

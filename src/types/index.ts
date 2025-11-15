@@ -40,6 +40,7 @@ export interface Event {
   description: string;
   organization: Organization;
   image?: string;
+  distance?: number;
 }
 
 export interface Organization {
