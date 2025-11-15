@@ -4,6 +4,7 @@ import { fetchBuildings } from '@/services/buildingsService';
 import { MapView } from '@/components/MapView';
 import { BuildingPanel } from '@/components/BuildingPanel';
 import { RoomBookingModal } from '@/components/RoomBookingModal';
+import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { Input } from '@/components/ui/input';
@@ -13,7 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Search, MapPin, Users, ChevronDown, X, Menu } from 'lucide-react';
+import { Search, MapPin, Users, ChevronDown, X, Menu, Navigation } from 'lucide-react';
+import { useLocation } from '@/contexts/LocationContext';
+import { toast } from 'sonner';
 
 const LockIn = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
@@ -26,6 +29,12 @@ const LockIn = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [buildingForBooking, setBuildingForBooking] = useState<Building | null>(null);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [navigationDestination, setNavigationDestination] = useState<{
+    coordinates: [number, number];
+    name: string;
+  } | null>(null);
+  const { userLocation, isLocationEnabled, enableLocation } = useLocation();
 
   useEffect(() => {
     loadBuildings();
@@ -67,6 +76,13 @@ const LockIn = () => {
 
   const FilterSection = () => (
     <div className="p-4 border-b border-border space-y-4">
+      {isLocationEnabled && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-2 rounded-lg">
+          <Navigation className="w-4 h-4 text-blue-600" />
+          <span>Location enabled - ready for navigation</span>
+        </div>
+      )}
+
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
@@ -216,7 +232,10 @@ const LockIn = () => {
                   className={`p-4 cursor-pointer transition-all hover:shadow-md ${
                     selectedBuilding?.id === building.id ? 'ring-2 ring-blue-600' : ''
                   }`}
-                  onClick={() => setSelectedBuilding(building)}
+                  onClick={() => {
+                    setBuildingForBooking(building);
+                    setShowBookingModal(true);
+                  }}
                 >
                   <div className="flex items-start gap-3">
                     <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
@@ -366,12 +385,25 @@ const LockIn = () => {
                 events={[]}
                 onBuildingClick={setSelectedBuilding}
                 onEventClick={() => {}}
+                userLocation={userLocation}
+                navigationDestination={navigationDestination}
+                onExitNavigation={() => setNavigationDestination(null)}
               />
 
-              {selectedBuilding && (
+              {selectedBuilding && !navigationDestination && (
                 <BuildingPanel
                   building={selectedBuilding}
                   onClose={() => setSelectedBuilding(null)}
+                  onNavigate={(building) => {
+                    if (!isLocationEnabled) {
+                      setShowLocationDialog(true);
+                      return;
+                    }
+                    setNavigationDestination({
+                      coordinates: building.coordinates,
+                      name: building.name
+                    });
+                  }}
                 />
               )}
             </div>
@@ -385,12 +417,25 @@ const LockIn = () => {
             events={[]}
             onBuildingClick={setSelectedBuilding}
             onEventClick={() => {}}
+            userLocation={userLocation}
+            navigationDestination={navigationDestination}
+            onExitNavigation={() => setNavigationDestination(null)}
           />
 
-          {selectedBuilding && (
+          {selectedBuilding && !navigationDestination && (
             <BuildingPanel
               building={selectedBuilding}
               onClose={() => setSelectedBuilding(null)}
+              onNavigate={(building) => {
+                if (!isLocationEnabled) {
+                  setShowLocationDialog(true);
+                  return;
+                }
+                setNavigationDestination({
+                  coordinates: building.coordinates,
+                  name: building.name
+                });
+              }}
             />
           )}
         </div>
@@ -405,6 +450,28 @@ const LockIn = () => {
         }}
         onBookingSuccess={() => {
           loadBuildings();
+        }}
+      />
+
+      <LocationPermissionDialog
+        open={showLocationDialog}
+        onOpenChange={setShowLocationDialog}
+        onEnable={async () => {
+          try {
+            await enableLocation();
+            setShowLocationDialog(false);
+            if (selectedBuilding) {
+              setNavigationDestination({
+                coordinates: selectedBuilding.coordinates,
+                name: selectedBuilding.name
+              });
+              if (activeView === 'list') {
+                setActiveView('map');
+              }
+            }
+          } catch (error) {
+            toast.error('Unable to access location. Please enable location permissions in your browser settings.');
+          }
         }}
       />
 

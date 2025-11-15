@@ -2,15 +2,16 @@ import { Building } from '@/types';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { X, Clock, Users, CheckCircle2, Circle, AlertCircle } from 'lucide-react';
+import { X, Clock, Users, CheckCircle2, Circle, AlertCircle, Navigation } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BuildingPanelProps {
   building: Building;
   onClose: () => void;
+  onNavigate?: (building: Building) => void;
 }
 
-export const BuildingPanel = ({ building, onClose }: BuildingPanelProps) => {
+export const BuildingPanel = ({ building, onClose, onNavigate }: BuildingPanelProps) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'available':
@@ -78,6 +79,17 @@ export const BuildingPanel = ({ building, onClose }: BuildingPanelProps) => {
               />
             </div>
           </div>
+
+          {onNavigate && (
+            <Button
+              onClick={() => onNavigate(building)}
+              className="w-full"
+              variant="default"
+            >
+              <Navigation className="w-4 h-4 mr-2" />
+              Get Directions
+            </Button>
+          )}
 
           <div className="space-y-3">
             <h3 className="font-semibold text-foreground flex items-center gap-2">
