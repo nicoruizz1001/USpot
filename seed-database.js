@@ -368,6 +368,25 @@ const uvaBuildings = [
   }
 ];
 
+function generateMockAvailability(buildingName, totalRooms) {
+  const rand = Math.random();
+  let availabilityRate;
+
+  if (buildingName.includes('Shannon') || buildingName.includes('Clemons')) {
+    availabilityRate = 0.3;
+  } else if (buildingName.includes('Brown') || buildingName.includes('Olsson')) {
+    availabilityRate = 0.6;
+  } else if (buildingName.includes('Rice') || buildingName.includes('Thornton')) {
+    availabilityRate = 0.1;
+  } else if (buildingName.includes('Newcomb')) {
+    availabilityRate = 0.8;
+  } else {
+    availabilityRate = 0.5;
+  }
+
+  return Math.random() < availabilityRate;
+}
+
 async function seedBuildings() {
   console.log('🌱 Starting to seed buildings...\n');
 
@@ -402,7 +421,7 @@ async function seedBuildings() {
         room_name: room.roomName,
         capacity: room.capacity,
         floor: room.floor,
-        available: true
+        available: generateMockAvailability(buildingData.building, buildingData.rooms.length)
       }));
 
       const { error: roomsError } = await supabase
@@ -412,8 +431,9 @@ async function seedBuildings() {
       if (roomsError) {
         console.error(`❌ Error inserting rooms for ${buildingData.building}:`, roomsError.message);
       } else {
+        const availableCount = roomsToInsert.filter(r => r.available).length;
         roomCount += buildingData.rooms.length;
-        console.log(`   📚 Inserted ${buildingData.rooms.length} rooms`);
+        console.log(`   📚 Inserted ${buildingData.rooms.length} rooms (${availableCount} available)`);
       }
     }
   }
