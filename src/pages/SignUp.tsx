@@ -113,8 +113,13 @@ const SignUp = () => {
         open={showLocationDialog}
         onOpenChange={setShowLocationDialog}
         onEnableLocation={async () => {
-          await enableLocation();
-          navigate('/');
+          try {
+            await enableLocation();
+          } catch (error) {
+            console.error('Location error:', error);
+          } finally {
+            navigate('/');
+          }
         }}
         onSkip={handleSkipLocation}
       />
