@@ -10,30 +10,43 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search, MapPin, Users } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Search, MapPin, Users, ChevronDown, X } from 'lucide-react';
 
 const LockIn = () => {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [locationFilter, setLocationFilter] = useState<string>('all');
-  const [buildingTypeFilter, setBuildingTypeFilter] = useState<string>('all');
+  const [locationFilters, setLocationFilters] = useState<string[]>([]);
+  const [buildingTypeFilters, setBuildingTypeFilters] = useState<string[]>([]);
 
   const filteredBuildings = mockBuildings.filter((building) => {
     const matchesSearch = building.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesLocation = locationFilter === 'all' || building.name.toLowerCase().includes(locationFilter.toLowerCase());
-    const matchesType = buildingTypeFilter === 'all' ||
-      (buildingTypeFilter === 'library' && building.name.toLowerCase().includes('library')) ||
-      (buildingTypeFilter === 'academic' && !building.name.toLowerCase().includes('library'));
+
+    const matchesLocation = locationFilters.length === 0 ||
+      locationFilters.some(filter => building.name.toLowerCase().includes(filter.toLowerCase()));
+
+    const matchesType = buildingTypeFilters.length === 0 ||
+      buildingTypeFilters.some(filter => {
+        if (filter === 'library') return building.name.toLowerCase().includes('library');
+        if (filter === 'academic') return !building.name.toLowerCase().includes('library');
+        return false;
+      });
 
     return matchesSearch && matchesLocation && matchesType;
   });
+
+  const toggleLocationFilter = (value: string) => {
+    setLocationFilters(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
+
+  const toggleBuildingTypeFilter = (value: string) => {
+    setBuildingTypeFilters(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -53,41 +66,84 @@ const LockIn = () => {
             </div>
 
             <div className="flex gap-2">
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="north">North Campus</SelectItem>
-                  <SelectItem value="central">Central Campus</SelectItem>
-                  <SelectItem value="south">South Campus</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="flex-1 justify-between">
+                    <span className="truncate">
+                      {locationFilters.length === 0
+                        ? 'Location'
+                        : `${locationFilters.length} selected`}
+                    </span>
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-3" align="start">
+                  <div className="space-y-3">
+                    <div className="font-medium text-sm">Location</div>
+                    {['north', 'central', 'south'].map((location) => (
+                      <div key={location} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`location-${location}`}
+                          checked={locationFilters.includes(location)}
+                          onCheckedChange={() => toggleLocationFilter(location)}
+                        />
+                        <label
+                          htmlFor={`location-${location}`}
+                          className="text-sm cursor-pointer capitalize"
+                        >
+                          {location} Campus
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
 
-              <Select value={buildingTypeFilter} onValueChange={setBuildingTypeFilter}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Buildings</SelectItem>
-                  <SelectItem value="library">Libraries</SelectItem>
-                  <SelectItem value="academic">Academic</SelectItem>
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="flex-1 justify-between">
+                    <span className="truncate">
+                      {buildingTypeFilters.length === 0
+                        ? 'Type'
+                        : `${buildingTypeFilters.length} selected`}
+                    </span>
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-3" align="start">
+                  <div className="space-y-3">
+                    <div className="font-medium text-sm">Building Type</div>
+                    {['library', 'academic'].map((type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`type-${type}`}
+                          checked={buildingTypeFilters.includes(type)}
+                          onCheckedChange={() => toggleBuildingTypeFilter(type)}
+                        />
+                        <label
+                          htmlFor={`type-${type}`}
+                          className="text-sm cursor-pointer capitalize"
+                        >
+                          {type === 'library' ? 'Libraries' : 'Academic'}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
                 {filteredBuildings.length} results
               </span>
-              {(locationFilter !== 'all' || buildingTypeFilter !== 'all' || searchQuery) && (
+              {(locationFilters.length > 0 || buildingTypeFilters.length > 0 || searchQuery) && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setLocationFilter('all');
-                    setBuildingTypeFilter('all');
+                    setLocationFilters([]);
+                    setBuildingTypeFilters([]);
                     setSearchQuery('');
                   }}
                 >
@@ -95,6 +151,29 @@ const LockIn = () => {
                 </Button>
               )}
             </div>
+
+            {(locationFilters.length > 0 || buildingTypeFilters.length > 0) && (
+              <div className="flex flex-wrap gap-2">
+                {locationFilters.map((filter) => (
+                  <Badge key={filter} variant="secondary" className="gap-1">
+                    {filter} Campus
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => toggleLocationFilter(filter)}
+                    />
+                  </Badge>
+                ))}
+                {buildingTypeFilters.map((filter) => (
+                  <Badge key={filter} variant="secondary" className="gap-1">
+                    {filter === 'library' ? 'Libraries' : 'Academic'}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => toggleBuildingTypeFilter(filter)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <ScrollArea className="flex-1">

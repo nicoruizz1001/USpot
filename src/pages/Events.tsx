@@ -10,21 +10,16 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search, Calendar, Clock, MapPin } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Search, Calendar, Clock, MapPin, ChevronDown, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [allEvents, setAllEvents] = useState<Event[]>(mockEvents);
   const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([]);
 
   useEffect(() => {
     fetchEvents();
@@ -75,11 +70,17 @@ const Events = () => {
       event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.building.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
-      categoryFilter === 'all' ||
-      event.category.toLowerCase() === categoryFilter.toLowerCase();
+      categoryFilters.length === 0 ||
+      categoryFilters.some(filter => event.category.toLowerCase() === filter.toLowerCase());
 
     return matchesSearch && matchesCategory;
   });
+
+  const toggleCategoryFilter = (value: string) => {
+    setCategoryFilters(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
@@ -110,31 +111,56 @@ const Events = () => {
               />
             </div>
 
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Events</SelectItem>
-                <SelectItem value="social">Club Events</SelectItem>
-                <SelectItem value="free food">Free Food</SelectItem>
-                <SelectItem value="academic">Campus Events</SelectItem>
-                <SelectItem value="sports">Sports</SelectItem>
-                <SelectItem value="entertainment">Entertainment</SelectItem>
-                <SelectItem value="arts">Arts</SelectItem>
-              </SelectContent>
-            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="truncate">
+                    {categoryFilters.length === 0
+                      ? 'Category'
+                      : `${categoryFilters.length} selected`}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-3" align="start">
+                <div className="space-y-3">
+                  <div className="font-medium text-sm">Category</div>
+                  {[
+                    { value: 'social', label: 'Club Events' },
+                    { value: 'free food', label: 'Free Food' },
+                    { value: 'academic', label: 'Campus Events' },
+                    { value: 'sports', label: 'Sports' },
+                    { value: 'entertainment', label: 'Entertainment' },
+                    { value: 'arts', label: 'Arts' },
+                  ].map((category) => (
+                    <div key={category.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category.value}`}
+                        checked={categoryFilters.includes(category.value)}
+                        onCheckedChange={() => toggleCategoryFilter(category.value)}
+                      />
+                      <label
+                        htmlFor={`category-${category.value}`}
+                        className="text-sm cursor-pointer"
+                      >
+                        {category.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
                 {filteredEvents.length} results
               </span>
-              {(categoryFilter !== 'all' || searchQuery) && (
+              {(categoryFilters.length > 0 || searchQuery) && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setCategoryFilter('all');
+                    setCategoryFilters([]);
                     setSearchQuery('');
                   }}
                 >
@@ -142,6 +168,26 @@ const Events = () => {
                 </Button>
               )}
             </div>
+
+            {categoryFilters.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {categoryFilters.map((filter) => (
+                  <Badge key={filter} variant="secondary" className="gap-1">
+                    {filter === 'social'
+                      ? 'Club Events'
+                      : filter === 'free food'
+                      ? 'Free Food'
+                      : filter === 'academic'
+                      ? 'Campus Events'
+                      : filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => toggleCategoryFilter(filter)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <ScrollArea className="flex-1">
