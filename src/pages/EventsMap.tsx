@@ -2,21 +2,39 @@ import { useState, useEffect } from 'react';
 import { Event } from '@/types';
 import { mockEvents } from '@/data/mockData';
 import { MapView } from '@/components/MapView';
-import { EventPanel } from '@/components/EventPanel';
+import { EventDetailModal } from '@/components/EventDetailModal';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { SecondaryBottomNav } from '@/components/SecondaryBottomNav';
 import { supabase } from '@/lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation as useRouterLocation } from 'react-router-dom';
+import { useLocation } from '@/contexts/LocationContext';
+import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
+import { toast } from 'sonner';
 
 const EventsMap = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [allEvents, setAllEvents] = useState<Event[]>(mockEvents);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [navigationDestination, setNavigationDestination] = useState<{
+    coordinates: [number, number];
+    name: string;
+  } | null>(null);
   const navigate = useNavigate();
+  const routerLocation = useRouterLocation();
+  const { userLocation, isLocationEnabled, enableLocation } = useLocation();
 
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    if (routerLocation.state?.navigationDestination) {
+      setNavigationDestination(routerLocation.state.navigationDestination);
+      window.history.replaceState({}, document.title);
+    }
+  }, [routerLocation]);
 
   const fetchEvents = async () => {
     try {
@@ -64,6 +82,42 @@ const EventsMap = () => {
     }
   };
 
+  const handleEventClick = (event: Event) => {
+    if (!navigationDestination) {
+      setSelectedEvent(event);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleNavigate = async (event: Event) => {
+    if (!isLocationEnabled) {
+      setShowLocationDialog(true);
+      return;
+    }
+
+    setIsModalOpen(false);
+    setNavigationDestination({
+      coordinates: event.coordinates,
+      name: event.title
+    });
+  };
+
+  const handleExitNavigation = () => {
+    setNavigationDestination(null);
+  };
+
+  const handleEnableLocation = async () => {
+    try {
+      await enableLocation();
+      setShowLocationDialog(false);
+      if (selectedEvent) {
+        handleNavigate(selectedEvent);
+      }
+    } catch (error) {
+      toast.error('Unable to access location. Please enable location permissions in your browser settings.');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <AppHeader showNavTabs />
@@ -74,22 +128,36 @@ const EventsMap = () => {
           buildings={[]}
           events={allEvents}
           onBuildingClick={() => {}}
-          onEventClick={setSelectedEvent}
+          onEventClick={handleEventClick}
+          userLocation={userLocation}
+          navigationDestination={navigationDestination}
+          onExitNavigation={handleExitNavigation}
         />
 
-        {selectedEvent && (
-          <EventPanel
-            event={selectedEvent}
-            onClose={() => setSelectedEvent(null)}
-          />
-        )}
+        <EventDetailModal
+          event={selectedEvent}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedEvent(null);
+          }}
+          onNavigate={handleNavigate}
+        />
 
-        <div className="absolute bottom-32 left-6 bg-white rounded-lg shadow-lg p-4 max-w-xs z-10 border border-border md:bottom-6">
-          <h3 className="font-bold text-foreground mb-1">Events Mode</h3>
-          <p className="text-sm text-muted-foreground">
-            Click pins to see event details
-          </p>
-        </div>
+        <LocationPermissionDialog
+          open={showLocationDialog}
+          onOpenChange={setShowLocationDialog}
+          onEnable={handleEnableLocation}
+        />
+
+        {!navigationDestination && (
+          <div className="absolute bottom-32 left-6 bg-white rounded-lg shadow-lg p-4 max-w-xs z-10 border border-border md:bottom-6">
+            <h3 className="font-bold text-foreground mb-1">Events Mode</h3>
+            <p className="text-sm text-muted-foreground">
+              Click pins to see event details
+            </p>
+          </div>
+        )}
       </div>
 
       <SecondaryBottomNav viewType="map" onViewChange={handleViewChange} />

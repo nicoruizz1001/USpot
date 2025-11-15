@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Event } from '@/types';
 import { mockEvents } from '@/data/mockData';
-import { EventPanel } from '@/components/EventPanel';
+import { EventDetailModal } from '@/components/EventDetailModal';
 import { EventList } from '@/components/EventList';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNavigation } from '@/components/BottomNavigation';
 import { SecondaryBottomNav } from '@/components/SecondaryBottomNav';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useLocation } from '@/contexts/LocationContext';
+import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
+import { toast } from 'sonner';
 
 const EventsList = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [allEvents, setAllEvents] = useState<Event[]>(mockEvents);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
   const navigate = useNavigate();
+  const { isLocationEnabled, enableLocation } = useLocation();
 
   useEffect(() => {
     fetchEvents();
@@ -64,6 +70,39 @@ const EventsList = () => {
     }
   };
 
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsModalOpen(true);
+  };
+
+  const handleNavigate = async (event: Event) => {
+    if (!isLocationEnabled) {
+      setShowLocationDialog(true);
+      return;
+    }
+
+    navigate('/events/map', {
+      state: {
+        navigationDestination: {
+          coordinates: event.coordinates,
+          name: event.title
+        }
+      }
+    });
+  };
+
+  const handleEnableLocation = async () => {
+    try {
+      await enableLocation();
+      setShowLocationDialog(false);
+      if (selectedEvent) {
+        handleNavigate(selectedEvent);
+      }
+    } catch (error) {
+      toast.error('Unable to access location. Please enable location permissions in your browser settings.');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <AppHeader showNavTabs />
@@ -74,15 +113,24 @@ const EventsList = () => {
             <h2 className="text-2xl font-bold text-foreground">Campus Events</h2>
           </div>
 
-          <EventList events={allEvents} onEventClick={setSelectedEvent} />
+          <EventList events={allEvents} onEventClick={handleEventClick} />
         </div>
 
-        {selectedEvent && (
-          <EventPanel
-            event={selectedEvent}
-            onClose={() => setSelectedEvent(null)}
-          />
-        )}
+        <EventDetailModal
+          event={selectedEvent}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedEvent(null);
+          }}
+          onNavigate={handleNavigate}
+        />
+
+        <LocationPermissionDialog
+          open={showLocationDialog}
+          onOpenChange={setShowLocationDialog}
+          onEnable={handleEnableLocation}
+        />
       </div>
 
       <SecondaryBottomNav viewType="list" onViewChange={handleViewChange} />
