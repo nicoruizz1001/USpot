@@ -27,12 +27,6 @@ const eventSchema = z.object({
   description: z.string().min(1, 'Description is required').max(500, 'Description must be less than 500 characters'),
   location_name: z.string().min(1, 'Location name is required'),
   room: z.string().optional(),
-  latitude: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90, {
-    message: 'Invalid latitude (-90 to 90)',
-  }),
-  longitude: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180, {
-    message: 'Invalid longitude (-180 to 180)',
-  }),
   event_date: z.string().min(1, 'Date is required'),
   event_time: z.string().min(1, 'Time is required'),
   category: z.string().min(1, 'Category is required'),
@@ -62,8 +56,6 @@ const CreateEvent = () => {
       description: '',
       location_name: '',
       room: '',
-      latitude: '38.0366',
-      longitude: '-78.5055',
       event_date: '',
       event_time: '',
       category: 'Social',
@@ -85,14 +77,19 @@ const CreateEvent = () => {
     setIsSubmitting(true);
 
     try {
+      const demoCoordinates = {
+        latitude: 38.0366 + (Math.random() - 0.5) * 0.02,
+        longitude: -78.5055 + (Math.random() - 0.5) * 0.02,
+      };
+
       const { error } = await supabase.from('events').insert([
         {
           title: data.title,
           description: data.description,
           location_name: data.location_name,
           room: data.room || '',
-          latitude: parseFloat(data.latitude),
-          longitude: parseFloat(data.longitude),
+          latitude: demoCoordinates.latitude,
+          longitude: demoCoordinates.longitude,
           event_date: data.event_date,
           event_time: data.event_time,
           category: data.category,
@@ -176,36 +173,6 @@ const CreateEvent = () => {
                       placeholder="Auditorium"
                       {...register('room')}
                     />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="latitude">Latitude *</Label>
-                    <Input
-                      id="latitude"
-                      type="number"
-                      step="any"
-                      placeholder="38.0366"
-                      {...register('latitude')}
-                    />
-                    {errors.latitude && (
-                      <p className="text-sm text-destructive">{errors.latitude.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="longitude">Longitude *</Label>
-                    <Input
-                      id="longitude"
-                      type="number"
-                      step="any"
-                      placeholder="-78.5055"
-                      {...register('longitude')}
-                    />
-                    {errors.longitude && (
-                      <p className="text-sm text-destructive">{errors.longitude.message}</p>
-                    )}
                   </div>
                 </div>
 
