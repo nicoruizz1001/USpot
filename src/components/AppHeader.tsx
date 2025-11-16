@@ -72,9 +72,9 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
           className="flex items-center hover:opacity-80 transition-opacity"
         >
           <img
-            src="/image.png"
-            alt="uSpot"
-            className="h-12 w-auto object-contain"
+            src="/image copy.png"
+            alt="uSpoot"
+            className="h-8 md:h-10 w-auto object-contain"
           />
         </button>
 

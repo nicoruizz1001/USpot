@@ -54,11 +54,13 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary text-primary-foreground rounded-full p-3">
-              <MapPin className="w-8 h-8" />
-            </div>
+            <img
+              src="/image copy.png"
+              alt="uSpoot"
+              className="h-16 md:h-20 w-auto object-contain"
+            />
           </div>
-          <CardTitle className="text-3xl font-bold">Welcome to Uspot</CardTitle>
+          <CardTitle className="text-3xl font-bold">Welcome to uSpoot</CardTitle>
           <CardDescription>
             Sign in to find study spaces and events on campus
           </CardDescription>
