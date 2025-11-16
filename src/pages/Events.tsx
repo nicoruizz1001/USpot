@@ -18,10 +18,21 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation, Menu } from 'lucide-react';
+import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation, Menu, Trash2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation } from '@/contexts/LocationContext';
 import { calculateDistance, sortByDistance, filterByDistance } from '@/utils/distance';
+import { deleteEvent } from '@/services/eventsService';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
@@ -39,6 +50,8 @@ const Events = () => {
     name: string;
   } | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { userLocation, isLocationEnabled, enableLocation } = useLocation();
   const navigate = useNavigate();
 
@@ -144,6 +157,41 @@ const Events = () => {
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   }, []);
+
+  const handleDeleteClick = (e: React.MouseEvent, eventId: string) => {
+    e.stopPropagation();
+    setEventToDelete(eventId);
+  };
+
+  const handleDeleteFromModal = (eventId: string) => {
+    setEventToDelete(eventId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete) return;
+
+    setIsDeleting(true);
+    const result = await deleteEvent(eventToDelete);
+
+    if (result.success) {
+      setAllEvents((prev) => prev.filter((event) => event.id !== eventToDelete));
+      toast.success('Event deleted successfully');
+
+      if (selectedEvent?.id === eventToDelete) {
+        setIsModalOpen(false);
+        setSelectedEvent(null);
+      }
+    } else {
+      toast.error(result.error || 'Failed to delete event');
+    }
+
+    setIsDeleting(false);
+    setEventToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setEventToDelete(null);
+  };
 
   const FilterSection = memo(() => (
     <div className="p-4 border-b border-border space-y-4">
@@ -307,7 +355,7 @@ const Events = () => {
                   {filteredEvents.map((event) => (
                     <Card
                       key={event.id}
-                      className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden ${
+                      className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden relative group ${
                         selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
                       }`}
                       onClick={() => {
@@ -315,6 +363,14 @@ const Events = () => {
                         setIsModalOpen(true);
                       }}
                     >
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 z-10"
+                        onClick={(e) => handleDeleteClick(e, event.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                       <div className="space-y-2 w-full min-w-0">
                         <div className="flex items-start justify-between gap-2 w-full">
                           <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
@@ -450,7 +506,7 @@ const Events = () => {
                 {filteredEvents.map((event) => (
                   <Card
                     key={event.id}
-                    className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden ${
+                    className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden relative group ${
                       selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
                     }`}
                     onClick={() => {
@@ -458,6 +514,14 @@ const Events = () => {
                     setIsModalOpen(true);
                   }}
                   >
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 z-10"
+                      onClick={(e) => handleDeleteClick(e, event.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                     <div className="space-y-2 w-full min-w-0">
                       <div className="flex items-start justify-between gap-2 w-full">
                         <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
@@ -553,6 +617,7 @@ const Events = () => {
             setActiveView('map');
           }
         }}
+        onDelete={handleDeleteFromModal}
       />
 
       <LocationPermissionDialog
@@ -579,6 +644,25 @@ const Events = () => {
       />
 
       <BottomNavigation />
+
+      <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete} disabled={isDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

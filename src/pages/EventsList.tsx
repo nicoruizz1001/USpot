@@ -11,12 +11,25 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from '@/contexts/LocationContext';
 import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
 import { toast } from 'sonner';
+import { deleteEvent } from '@/services/eventsService';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const EventsList = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [allEvents, setAllEvents] = useState<Event[]>(mockEvents);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
   const { isLocationEnabled, enableLocation } = useLocation();
 
@@ -103,6 +116,36 @@ const EventsList = () => {
     }
   };
 
+  const handleDeleteClick = (eventId: string) => {
+    setEventToDelete(eventId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete) return;
+
+    setIsDeleting(true);
+    const result = await deleteEvent(eventToDelete);
+
+    if (result.success) {
+      setAllEvents((prev) => prev.filter((event) => event.id !== eventToDelete));
+      toast.success('Event deleted successfully');
+
+      if (selectedEvent?.id === eventToDelete) {
+        setIsModalOpen(false);
+        setSelectedEvent(null);
+      }
+    } else {
+      toast.error(result.error || 'Failed to delete event');
+    }
+
+    setIsDeleting(false);
+    setEventToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setEventToDelete(null);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <AppHeader showNavTabs />
@@ -113,7 +156,7 @@ const EventsList = () => {
             <h2 className="text-2xl font-bold text-foreground">Campus Events</h2>
           </div>
 
-          <EventList events={allEvents} onEventClick={handleEventClick} />
+          <EventList events={allEvents} onEventClick={handleEventClick} onDeleteEvent={handleDeleteClick} />
         </div>
 
         <EventDetailModal
@@ -124,6 +167,7 @@ const EventsList = () => {
             setSelectedEvent(null);
           }}
           onNavigate={handleNavigate}
+          onDelete={handleDeleteClick}
         />
 
         <LocationPermissionDialog
@@ -135,6 +179,25 @@ const EventsList = () => {
 
       <SecondaryBottomNav viewType="list" onViewChange={handleViewChange} />
       <BottomNavigation />
+
+      <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && handleCancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete} disabled={isDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -74,6 +74,7 @@ export interface Event {
   organization: Organization;
   image?: string;
   distance?: number;
+  created_by?: string;
 }
 
 export interface Organization {

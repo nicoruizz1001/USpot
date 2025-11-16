@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Calendar, Clock, MapPin, Instagram, Globe, ExternalLink, X, Navigation } from 'lucide-react';
+import { Calendar, Clock, MapPin, Instagram, Globe, ExternalLink, X, Navigation, Trash2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface EventDetailModalProps {
@@ -12,9 +12,10 @@ interface EventDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNavigate: (event: Event) => void;
+  onDelete?: (eventId: string) => void;
 }
 
-export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDetailModalProps) => {
+export const EventDetailModal = ({ event, isOpen, onClose, onNavigate, onDelete }: EventDetailModalProps) => {
   const isMobile = useIsMobile();
 
   if (!event) return null;
@@ -22,6 +23,12 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
   const handleNavigate = () => {
     onNavigate(event);
     onClose();
+  };
+
+  const handleDelete = () => {
+    if (onDelete && event) {
+      onDelete(event.id);
+    }
   };
 
   const content = (
@@ -167,7 +174,7 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
         </div>
       </ScrollArea>
 
-      <div className="mt-4 pt-4 border-t border-border">
+      <div className="mt-4 pt-4 border-t border-border space-y-2">
         <Button
           className="w-full"
           size="lg"
@@ -176,6 +183,17 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate }: EventDe
           <Navigation className="w-4 h-4 mr-2" />
           Get Directions
         </Button>
+        {onDelete && (
+          <Button
+            variant="destructive"
+            className="w-full"
+            size="lg"
+            onClick={handleDelete}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete Event
+          </Button>
+        )}
       </div>
     </div>
   );
