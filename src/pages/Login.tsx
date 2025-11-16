@@ -60,7 +60,7 @@ const Login = () => {
               className="h-16 md:h-20 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-3xl font-bold">Welcome to uSpoot</CardTitle>
+          <CardTitle className="text-3xl font-bold">Welcome to uSpot</CardTitle>
           <CardDescription>
             Sign in to find study spaces and events on campus
           </CardDescription>

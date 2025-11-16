@@ -52,7 +52,7 @@ const SignUp = () => {
               className="h-16 md:h-20 w-auto object-contain"
             />
           </div>
-          <CardTitle className="text-3xl font-bold">Join uSpoot</CardTitle>
+          <CardTitle className="text-3xl font-bold">Join uSpot</CardTitle>
           <CardDescription>
             Create an account to start exploring campus
           </CardDescription>
