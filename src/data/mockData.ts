@@ -120,9 +120,11 @@ export const mockEvents: Event[] = [
     date: 'Today',
     category: 'Social',
     description: 'Join us for networking and mingling with CS faculty and students.',
+    image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&h=600&fit=crop',
     organization: {
       name: 'CS Club',
       description: 'University Computer Science student organization',
+      logo: 'https://api.dicebear.com/7.x/shapes/svg?seed=csclub&backgroundColor=3b82f6',
       links: {
         instagram: 'https://instagram.com/uva_cs',
         website: 'https://csclub.virginia.edu'
@@ -139,9 +141,11 @@ export const mockEvents: Event[] = [
     date: 'Tonight',
     category: 'Entertainment',
     description: 'Enjoy an evening of live jazz performances by student musicians.',
+    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800&h=600&fit=crop',
     organization: {
       name: 'Student Activities',
       description: 'Creating memorable experiences for the UVA community',
+      logo: 'https://api.dicebear.com/7.x/shapes/svg?seed=studentactivities&backgroundColor=ec4899',
       links: {
         instagram: 'https://instagram.com/uva_activities'
       }
@@ -157,9 +161,11 @@ export const mockEvents: Event[] = [
     date: 'Today',
     category: 'Sports',
     description: 'Watch the big game with fellow students. Food and drinks provided!',
+    image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&h=600&fit=crop',
     organization: {
       name: 'Student Union',
       description: 'Bringing the student community together',
+      logo: 'https://api.dicebear.com/7.x/shapes/svg?seed=studentunion&backgroundColor=10b981',
       links: {}
     }
   },
@@ -173,9 +179,11 @@ export const mockEvents: Event[] = [
     date: 'Today',
     category: 'Academic',
     description: 'Take a break from studying with free coffee and snacks.',
+    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&h=600&fit=crop',
     organization: {
       name: 'Library Services',
       description: 'Supporting student success',
+      logo: 'https://api.dicebear.com/7.x/shapes/svg?seed=library&backgroundColor=8b5cf6',
       links: {
         website: 'https://library.virginia.edu'
       }
@@ -191,9 +199,11 @@ export const mockEvents: Event[] = [
     date: 'Today',
     category: 'Arts',
     description: 'Share your poetry or enjoy performances from talented student poets.',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=600&fit=crop',
     organization: {
       name: 'Creative Writing Club',
       description: 'Fostering literary arts on campus',
+      logo: 'https://api.dicebear.com/7.x/shapes/svg?seed=poetry&backgroundColor=f97316',
       links: {
         instagram: 'https://instagram.com/uva_poetry'
       }

@@ -4,6 +4,8 @@ import { mockEvents } from '@/data/mockData';
 import { MapView } from '@/components/MapView';
 import { EventDetailModal } from '@/components/EventDetailModal';
 import { LocationPermissionDialog } from '@/components/LocationPermissionDialog';
+import { ModernEventCard } from '@/components/ModernEventCard';
+import { ModernFilterChips } from '@/components/ModernFilterChips';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '@/components/AppHeader';
@@ -11,14 +13,13 @@ import { BottomNavigation } from '@/components/BottomNavigation';
 import { DistanceBadge } from '@/components/DistanceBadge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
-import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation, Menu, Trash2 } from 'lucide-react';
+import { Search, Calendar, Clock, MapPin, ChevronDown, X, ArrowUpDown, Navigation, Menu, Trash2, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation } from '@/contexts/LocationContext';
 import { calculateDistance, sortByDistance, filterByDistance } from '@/utils/distance';
@@ -194,63 +195,31 @@ const Events = () => {
   };
 
   const FilterSection = memo(() => (
-    <div className="p-4 border-b border-border space-y-4">
+    <div className="p-4 space-y-4">
       {isLocationEnabled && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-2 rounded-lg">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded-xl">
           <Navigation className="w-4 h-4 text-blue-600" />
           <span>Location enabled - showing distances</span>
         </div>
       )}
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
           placeholder="Search events..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="pl-10"
+          className="pl-12 h-12 rounded-2xl border-2 focus:border-blue-500 transition-colors"
         />
       </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full justify-between">
-            <span className="truncate">
-              {categoryFilters.length === 0
-                ? 'Category'
-                : `${categoryFilters.length} selected`}
-            </span>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64 p-3" align="start">
-          <div className="space-y-3">
-            <div className="font-medium text-sm">Category</div>
-            {[
-              { value: 'social', label: 'Club Events' },
-              { value: 'free food', label: 'Free Food' },
-              { value: 'academic', label: 'Campus Events' },
-              { value: 'sports', label: 'Sports' },
-              { value: 'entertainment', label: 'Entertainment' },
-              { value: 'arts', label: 'Arts' },
-            ].map((category) => (
-              <div key={category.value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`category-${category.value}-filter`}
-                  checked={categoryFilters.includes(category.value)}
-                  onCheckedChange={() => toggleCategoryFilter(category.value)}
-                />
-                <label
-                  htmlFor={`category-${category.value}-filter`}
-                  className="text-sm cursor-pointer"
-                >
-                  {category.label}
-                </label>
-              </div>
-            ))}
-          </div>
-        </PopoverContent>
-      </Popover>
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-3 px-1">Categories</h3>
+        <ModernFilterChips
+          filters={categoryFilters}
+          onFilterToggle={toggleCategoryFilter}
+        />
+      </div>
 
       {isLocationEnabled && (
         <div className="space-y-3">
@@ -297,9 +266,9 @@ const Events = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-muted-foreground">
-          {filteredEvents.length} results
+      <div className="flex items-center justify-between text-sm pt-2">
+        <span className="text-muted-foreground font-medium">
+          {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''}
         </span>
         {(categoryFilters.length > 0 || searchQuery || showDistanceFilter) && (
           <Button
@@ -312,31 +281,12 @@ const Events = () => {
               setMaxDistance(10);
               setSortBy('date');
             }}
+            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
           >
-            Clear filters
+            Clear all
           </Button>
         )}
       </div>
-
-      {categoryFilters.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {categoryFilters.map((filter) => (
-            <Badge key={filter} variant="secondary" className="gap-1">
-              {filter === 'social'
-                ? 'Club Events'
-                : filter === 'free food'
-                ? 'Free Food'
-                : filter === 'academic'
-                ? 'Campus Events'
-                : filter.charAt(0).toUpperCase() + filter.slice(1)}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => toggleCategoryFilter(filter)}
-              />
-            </Badge>
-          ))}
-        </div>
-      )}
     </div>
   ));
 
@@ -351,72 +301,24 @@ const Events = () => {
               <FilterSection />
 
               <ScrollArea className="flex-1">
-                <div className="p-4 space-y-3">
+                <div className="p-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {filteredEvents.map((event) => (
-                    <Card
+                    <ModernEventCard
                       key={event.id}
-                      className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden relative group ${
-                        selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
-                      }`}
+                      event={event}
                       onClick={() => {
                         setSelectedEvent(event);
                         setIsModalOpen(true);
                       }}
-                    >
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 z-10"
-                        onClick={(e) => handleDeleteClick(e, event.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                      <div className="space-y-2 w-full min-w-0">
-                        <div className="flex items-start justify-between gap-2 w-full">
-                          <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
-                            {event.title}
-                          </h3>
-                          <Badge className={`${getCategoryColor(event.category)} text-xs shrink-0 whitespace-nowrap`}>
-                            {event.category}
-                          </Badge>
-                        </div>
-
-                        <div className="space-y-1 text-sm text-muted-foreground w-full">
-                          <div className="flex items-center gap-2 w-full min-w-0">
-                            <Calendar className="w-4 h-4 shrink-0" />
-                            <span className="truncate flex-1">{new Date(event.date).toLocaleDateString()}</span>
-                          </div>
-                          <div className="flex items-center gap-2 w-full min-w-0">
-                            <Clock className="w-4 h-4 shrink-0" />
-                            <span className="truncate flex-1">{event.time}</span>
-                          </div>
-                          <div className="flex items-center gap-2 w-full min-w-0">
-                            <MapPin className="w-4 h-4 shrink-0" />
-                            <span className="truncate flex-1">
-                              {event.building} {event.room && `- ${event.room}`}
-                            </span>
-                          </div>
-                          {isLocationEnabled && event.distance !== undefined && (
-                            <div className="flex items-center gap-2">
-                              <DistanceBadge distance={event.distance} />
-                            </div>
-                          )}
-                        </div>
-
-                        {event.organization.name && (
-                          <div className="pt-2 border-t border-border w-full min-w-0">
-                            <p className="text-xs text-muted-foreground truncate">
-                              by {event.organization.name}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </Card>
+                    />
                   ))}
 
+                  </div>
                   {filteredEvents.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No events found matching your filters
+                    <div className="text-center py-12 text-muted-foreground">
+                      <p className="text-lg font-medium mb-2">No events found</p>
+                      <p className="text-sm">Try adjusting your filters</p>
                     </div>
                   )}
                 </div>
@@ -456,9 +358,9 @@ const Events = () => {
               className="w-full py-3 flex items-center justify-between px-4 hover:bg-accent"
             >
               <div className="flex items-center gap-2">
-                <Menu className="w-5 h-5" />
+                <SlidersHorizontal className="w-5 h-5" />
                 <span className="font-medium">
-                  {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+                  Filters
                 </span>
               </div>
               {(categoryFilters.length > 0 || showDistanceFilter) && (
@@ -502,72 +404,24 @@ const Events = () => {
 
           {activeView === 'list' ? (
             <ScrollArea className="flex-1">
-              <div className="p-4 space-y-3">
+              <div className="p-4">
+                <div className="grid grid-cols-1 gap-4">
                 {filteredEvents.map((event) => (
-                  <Card
+                  <ModernEventCard
                     key={event.id}
-                    className={`p-4 cursor-pointer transition-all hover:shadow-md overflow-hidden relative group ${
-                      selectedEvent?.id === event.id ? 'ring-2 ring-blue-600' : ''
-                    }`}
+                    event={event}
                     onClick={() => {
-                    setSelectedEvent(event);
-                    setIsModalOpen(true);
-                  }}
-                  >
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 z-10"
-                      onClick={(e) => handleDeleteClick(e, event.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                    <div className="space-y-2 w-full min-w-0">
-                      <div className="flex items-start justify-between gap-2 w-full">
-                        <h3 className="font-semibold text-foreground line-clamp-2 flex-1 min-w-0 max-w-[calc(100%-80px)]">
-                          {event.title}
-                        </h3>
-                        <Badge className={`${getCategoryColor(event.category)} text-xs shrink-0 whitespace-nowrap`}>
-                          {event.category}
-                        </Badge>
-                      </div>
-
-                      <div className="space-y-1 text-sm text-muted-foreground w-full">
-                        <div className="flex items-center gap-2 w-full min-w-0">
-                          <Calendar className="w-4 h-4 shrink-0" />
-                          <span className="truncate flex-1">{new Date(event.date).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex items-center gap-2 w-full min-w-0">
-                          <Clock className="w-4 h-4 shrink-0" />
-                          <span className="truncate flex-1">{event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-2 w-full min-w-0">
-                          <MapPin className="w-4 h-4 shrink-0" />
-                          <span className="truncate flex-1">
-                            {event.building} {event.room && `- ${event.room}`}
-                          </span>
-                        </div>
-                        {isLocationEnabled && event.distance !== undefined && (
-                          <div className="flex items-center gap-2">
-                            <DistanceBadge distance={event.distance} />
-                          </div>
-                        )}
-                      </div>
-
-                      {event.organization.name && (
-                        <div className="pt-2 border-t border-border w-full min-w-0">
-                          <p className="text-xs text-muted-foreground truncate">
-                            by {event.organization.name}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
+                      setSelectedEvent(event);
+                      setIsModalOpen(true);
+                    }}
+                  />
                 ))}
 
+                </div>
                 {filteredEvents.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No events found matching your filters
+                  <div className="text-center py-12 text-muted-foreground">
+                    <p className="text-lg font-medium mb-2">No events found</p>
+                    <p className="text-sm">Try adjusting your filters</p>
                   </div>
                 )}
               </div>
