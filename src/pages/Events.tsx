@@ -304,7 +304,7 @@ const Events = () => {
       <AppHeader showNavTabs />
 
       <div className="flex-1 flex overflow-hidden pb-16 md:pb-0">
-        <ResizablePanelGroup direction="horizontal" className="hidden md:flex">
+        <ResizablePanelGroup direction="horizontal" className="hidden md:flex flex-1">
           <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
             <div className="flex flex-col h-full border-r border-border bg-background">
               <FilterSection />
@@ -337,7 +337,7 @@ const Events = () => {
           <ResizableHandle withHandle className="hover:bg-blue-200 transition-colors" />
 
           <ResizablePanel defaultSize={70} minSize={50}>
-            <div className="h-full relative">
+            <div className="h-full w-full relative">
               <MapView
                 mode="events"
                 buildings={[]}
