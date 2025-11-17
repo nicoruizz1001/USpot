@@ -164,8 +164,8 @@ const LockIn = () => {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       <AppHeader showNavTabs />
 
-      <div className="flex-1 flex overflow-hidden pb-16 md:pb-0">
-        <div className="hidden md:flex w-96 border-r border-border bg-background flex-col">
+      <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
+        <div className="hidden lg:flex w-96 border-r border-border bg-background flex-col">
           <FilterSection />
 
           <ScrollArea className="flex-1">
@@ -197,7 +197,7 @@ const LockIn = () => {
           </ScrollArea>
         </div>
 
-        <div className="md:hidden flex-1 flex flex-col overflow-hidden max-w-full">
+        <div className="lg:hidden flex-1 flex flex-col overflow-hidden max-w-full">
           <div className="border-b border-border bg-background">
             <Button
               variant="ghost"
@@ -311,7 +311,7 @@ const LockIn = () => {
           )}
         </div>
 
-        <div className="hidden md:block flex-1 relative">
+        <div className="hidden lg:block flex-1 relative">
           <MapView
             mode="lock-in"
             buildings={filteredBuildings}

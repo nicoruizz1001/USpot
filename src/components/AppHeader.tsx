@@ -79,7 +79,7 @@ export const AppHeader = ({ hideActions = false, showNavTabs = false }: AppHeade
         </button>
 
         {showNavTabs && (
-          <nav className="hidden md:flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+          <nav className="hidden lg:flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
             <Button
               variant={isLockInActive ? 'default' : 'ghost'}
               onClick={() => navigate('/lock-in')}

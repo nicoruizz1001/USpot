@@ -303,8 +303,8 @@ const Events = () => {
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       <AppHeader showNavTabs />
 
-      <div className="flex-1 flex overflow-hidden pb-16 md:pb-0">
-        <ResizablePanelGroup direction="horizontal" className="hidden md:flex flex-1">
+      <div className="flex-1 flex overflow-hidden pb-16 lg:pb-0">
+        <ResizablePanelGroup direction="horizontal" className="hidden lg:flex flex-1">
           <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
             <div className="flex flex-col h-full border-r border-border bg-background">
               <FilterSection />
@@ -357,7 +357,7 @@ const Events = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
 
-        <div className="md:hidden flex-1 flex flex-col overflow-hidden max-w-full">
+        <div className="lg:hidden flex-1 flex flex-col overflow-hidden max-w-full">
           <div className="border-b border-border bg-background">
             <Button
               variant="ghost"

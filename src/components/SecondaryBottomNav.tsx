@@ -10,7 +10,7 @@ interface SecondaryBottomNavProps {
 
 export const SecondaryBottomNav = ({ viewType, onViewChange }: SecondaryBottomNavProps) => {
   return (
-    <div className="fixed bottom-16 left-0 right-0 z-40 bg-white border-t border-border shadow-md md:hidden">
+    <div className="fixed bottom-16 left-0 right-0 z-40 bg-white border-t border-border shadow-md lg:hidden">
       <div className="flex items-center justify-around h-14">
         <button
           onClick={() => onViewChange('map')}
