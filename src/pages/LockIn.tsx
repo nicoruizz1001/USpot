@@ -357,7 +357,7 @@ const LockIn = () => {
       <LocationPermissionDialog
         open={showLocationDialog}
         onOpenChange={setShowLocationDialog}
-        onEnable={async () => {
+        onEnableLocation={async () => {
           try {
             await enableLocation();
             setShowLocationDialog(false);
