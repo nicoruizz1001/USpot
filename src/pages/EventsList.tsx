@@ -173,7 +173,8 @@ const EventsList = () => {
         <LocationPermissionDialog
           open={showLocationDialog}
           onOpenChange={setShowLocationDialog}
-          onEnable={handleEnableLocation}
+          onEnableLocation={handleEnableLocation}
+          onSkip={() => setShowLocationDialog(false)}
         />
       </div>
 

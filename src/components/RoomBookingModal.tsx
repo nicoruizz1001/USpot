@@ -247,7 +247,7 @@ export const RoomBookingModal = ({ building, open, onClose, onBookingSuccess }: 
               </div>
 
               {floorFilter.length > 0 && (
-                <ScrollArea className="w-full" orientation="horizontal">
+                <ScrollArea className="w-full">
                   <div className="flex gap-2 pb-2">
                     {floorFilter.map(floor => (
                       <Badge key={floor} variant="secondary" className="gap-1 whitespace-nowrap flex-shrink-0">

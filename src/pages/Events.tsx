@@ -503,6 +503,7 @@ const Events = () => {
             toast.error('Unable to access location. Please enable location permissions in your browser settings.');
           }
         }}
+        onSkip={() => setShowLocationDialog(false)}
       />
 
       <BottomNavigation />
