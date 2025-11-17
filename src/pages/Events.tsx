@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Event } from '@/types';
 import { mockEvents } from '@/data/mockData';
 import { MapView } from '@/components/MapView';
@@ -194,8 +194,8 @@ const Events = () => {
     setEventToDelete(null);
   };
 
-  const FilterSection = memo(() => (
-    <div className="p-4 space-y-4">
+  const FilterSection = () => (
+    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
       {isLocationEnabled && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded-xl">
           <Navigation className="w-4 h-4 text-blue-600" />
@@ -204,12 +204,12 @@ const Events = () => {
       )}
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
         <Input
           placeholder="Search events..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="pl-12 h-12 rounded-2xl border-2 focus:border-blue-500 transition-colors"
+          className="pl-10 sm:pl-12 h-10 sm:h-12 rounded-2xl border-2 focus:border-blue-500 transition-colors text-sm sm:text-base"
         />
       </div>
 
@@ -288,7 +288,7 @@ const Events = () => {
         )}
       </div>
     </div>
-  ));
+  );
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -301,8 +301,8 @@ const Events = () => {
               <FilterSection />
 
               <ScrollArea className="flex-1">
-                <div className="p-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="p-3 sm:p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {filteredEvents.map((event) => (
                     <ModernEventCard
                       key={event.id}
@@ -404,8 +404,8 @@ const Events = () => {
 
           {activeView === 'list' ? (
             <ScrollArea className="flex-1">
-              <div className="p-4">
-                <div className="grid grid-cols-1 gap-4">
+              <div className="p-3 sm:p-4">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4 max-w-full">
                 {filteredEvents.map((event) => (
                   <ModernEventCard
                     key={event.id}

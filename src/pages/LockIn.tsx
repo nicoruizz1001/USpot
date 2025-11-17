@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect } from 'react';
 import { Building } from '@/types';
 import { fetchBuildings } from '@/services/buildingsService';
 import { MapView } from '@/components/MapView';
@@ -76,8 +76,8 @@ const LockIn = () => {
     setSearchQuery(e.target.value);
   };
 
-  const FilterSection = memo(() => (
-    <div className="p-4 space-y-4">
+  const FilterSection = () => (
+    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
       {isLocationEnabled && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 dark:bg-blue-950 p-3 rounded-xl">
           <Navigation className="w-4 h-4 text-blue-600" />
@@ -86,12 +86,12 @@ const LockIn = () => {
       )}
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
         <Input
           placeholder="Search buildings..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="pl-12 h-12 rounded-2xl border-2 focus:border-blue-500 transition-colors"
+          className="pl-10 sm:pl-12 h-10 sm:h-12 rounded-2xl border-2 focus:border-blue-500 transition-colors text-sm sm:text-base"
         />
       </div>
 
@@ -112,7 +112,7 @@ const LockIn = () => {
                 key={category}
                 onClick={() => toggleCategoryFilter(category!)}
                 className={`
-                  flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
+                  flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium
                   transition-all duration-200 whitespace-nowrap shrink-0
                   ${
                     isActive
@@ -122,7 +122,7 @@ const LockIn = () => {
                 `}
               >
                 {category}
-                {isActive && <X className="w-3.5 h-3.5" />}
+                {isActive && <X className="w-3 sm:w-3.5 h-3 sm:h-3.5" />}
               </button>
             );
           })}
@@ -149,7 +149,7 @@ const LockIn = () => {
         )}
       </div>
     </div>
-  ));
+  );
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -160,8 +160,8 @@ const LockIn = () => {
           <FilterSection />
 
           <ScrollArea className="flex-1">
-            <div className="p-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="p-3 sm:p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {loading ? (
                 <div className="col-span-full text-center py-12 text-muted-foreground">
                   <p className="text-lg font-medium">Loading buildings...</p>
@@ -243,8 +243,8 @@ const LockIn = () => {
 
           {activeView === 'list' ? (
             <ScrollArea className="flex-1">
-              <div className="p-4">
-                <div className="grid grid-cols-1 gap-4">
+              <div className="p-3 sm:p-4">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4 max-w-full">
                 {loading ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <p className="text-lg font-medium">Loading buildings...</p>

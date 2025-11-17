@@ -31,7 +31,7 @@ export const ModernFilterChips = ({ filters, onFilterToggle }: ModernFilterChips
             key={option.value}
             onClick={() => onFilterToggle(option.value)}
             className={`
-              flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
+              flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium
               transition-all duration-200 whitespace-nowrap shrink-0
               ${
                 isActive
@@ -41,7 +41,7 @@ export const ModernFilterChips = ({ filters, onFilterToggle }: ModernFilterChips
             `}
           >
             {option.label}
-            {isActive && <X className="w-3.5 h-3.5" />}
+            {isActive && <X className="w-3 sm:w-3.5 h-3 sm:h-3.5" />}
           </button>
         );
       })}
