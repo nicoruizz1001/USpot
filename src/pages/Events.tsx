@@ -155,9 +155,9 @@ const Events = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-  }, []);
+  };
 
   const handleDeleteClick = (e: React.MouseEvent, eventId: string) => {
     e.stopPropagation();
