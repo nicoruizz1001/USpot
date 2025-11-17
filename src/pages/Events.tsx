@@ -155,8 +155,17 @@ const Events = () => {
     return colors[category] || 'bg-gray-100 text-gray-800';
   };
 
+  const [inputValue, setInputValue] = useState(searchQuery);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(inputValue);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    setInputValue(e.target.value);
   };
 
   const handleDeleteClick = (e: React.MouseEvent, eventId: string) => {
@@ -207,7 +216,7 @@ const Events = () => {
         <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
         <Input
           placeholder="Search events..."
-          value={searchQuery}
+          value={inputValue}
           onChange={handleSearchChange}
           className="pl-10 sm:pl-12 h-10 sm:h-12 rounded-2xl border-2 focus:border-blue-500 transition-colors text-sm sm:text-base"
         />
@@ -291,7 +300,7 @@ const Events = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       <AppHeader showNavTabs />
 
       <div className="flex-1 flex overflow-hidden pb-16 md:pb-0">
@@ -302,7 +311,7 @@ const Events = () => {
 
               <ScrollArea className="flex-1">
                 <div className="p-3 sm:p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="space-y-3 sm:space-y-4">
                   {filteredEvents.map((event) => (
                     <ModernEventCard
                       key={event.id}
@@ -313,7 +322,6 @@ const Events = () => {
                       }}
                     />
                   ))}
-
                   </div>
                   {filteredEvents.length === 0 && (
                     <div className="text-center py-12 text-muted-foreground">
@@ -349,7 +357,7 @@ const Events = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
 
-        <div className="md:hidden flex-1 flex flex-col">
+        <div className="md:hidden flex-1 flex flex-col overflow-hidden max-w-full">
           <div className="border-b border-border bg-background">
             <Button
               variant="ghost"
@@ -404,8 +412,8 @@ const Events = () => {
 
           {activeView === 'list' ? (
             <ScrollArea className="flex-1">
-              <div className="p-3 sm:p-4">
-                <div className="grid grid-cols-1 gap-3 sm:gap-4 max-w-full">
+              <div className="p-3 sm:p-4 max-w-full">
+                <div className="space-y-3 sm:space-y-4 w-full">
                 {filteredEvents.map((event) => (
                   <ModernEventCard
                     key={event.id}

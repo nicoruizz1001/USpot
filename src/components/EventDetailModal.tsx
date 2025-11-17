@@ -44,9 +44,9 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate, onDelete 
   };
 
   const content = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {event.image && (
-        <div className="relative -mx-6 -mt-6 mb-6">
+        <div className="relative -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-4 sm:mb-6 shrink-0">
           <div className="aspect-[16/9] w-full overflow-hidden bg-gray-200">
             <img
               src={event.image}
@@ -108,8 +108,8 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate, onDelete 
         </div>
       )}
 
-      <ScrollArea className="flex-1 -mx-6 px-6">
-        <div className="space-y-6 pb-6">
+      <ScrollArea className="flex-1 -mx-4 sm:-mx-6 px-4 sm:px-6 min-h-0">
+        <div className="space-y-4 sm:space-y-6 pb-4 sm:pb-6">
           {event.image && (
             <div>
               <h2 className="text-3xl font-bold text-foreground mb-2">{event.title}</h2>
@@ -231,7 +231,7 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate, onDelete 
         </div>
       </ScrollArea>
 
-      <div className="mt-6 pt-4 border-t border-border">
+      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-border shrink-0">
         <Button
           className={`w-full rounded-full bg-gradient-to-r ${getCategoryGradient(event.category)} hover:opacity-90 transition-opacity text-white border-0`}
           size="lg"
@@ -250,7 +250,7 @@ export const EventDetailModal = ({ event, isOpen, onClose, onNavigate, onDelete 
         <Sheet open={isOpen} onOpenChange={onClose}>
           <SheetContent
             side="bottom"
-            className="h-[95vh] rounded-t-3xl p-6 z-[100]"
+            className="h-[95vh] max-h-[95vh] rounded-t-3xl p-4 sm:p-6 z-[100] overflow-hidden"
           >
             {content}
           </SheetContent>
